@@ -20,10 +20,10 @@ SEED = 20261101
 THEMES = {
     "light": {"bg": "#ffffff", "fg": "#1f2328", "muted": "#59636e", "grid": "#d1d9e0",
               "S": "#D55E00", "P": "#0072B2", "A": "#E69F00", "other": "#999999", "ceiling": "#59636e",
-              "access": ("#D55E00", "#E69F00", "#CC79A7", "#0072B2")},
+              "access": ("#D55E00", "#E69F00", "#000000", "#CC79A7", "#0072B2")},
     "dark": {"bg": "#0d1117", "fg": "#e6edf3", "muted": "#9198a1", "grid": "#3d444d",
              "S": "#E69F00", "P": "#56B4E9", "A": "#F0E442", "other": "#8b949e", "ceiling": "#9198a1",
-             "access": ("#D55E00", "#E69F00", "#CC79A7", "#56B4E9")},
+             "access": ("#D55E00", "#E69F00", "#F0E442", "#CC79A7", "#56B4E9")},
 }
 
 
@@ -56,8 +56,10 @@ def _save(fig, out: Path, stem: str, theme_name: str) -> list[Path]:
 
 
 # one marker shape per access group, so the groups differ without colour too
-ACCESS_MARKERS = ("s", "D", "^", "o")
-SHORT = {"P": "patching"}
+ACCESS_MARKERS = ("s", "D", "v", "^", "o")
+SHORT = {"P": "patching", "M3": "|weights| x neuron\nactivity", "M_akt": "|weights| x source\nactivity",
+         "M5": "|weights| x source\nSAE code", "S_act": "synapse count x\nsource activity †",
+         "act": "source activity\nonly †"}
 LABEL_WIDTH = 0.14  # width of a label like "53%" in data units of the hero (15 pt on a 5 inch figure)
 
 
@@ -75,7 +77,7 @@ def hero(results: dict, plt, theme: dict):
     """Share of the achievable signal of every method (mean over the trained models, bootstrap 95% CI),
     coloured by the access to the network the method needs."""
     rows = share_rows(results)
-    fig, ax = plt.subplots(figsize=(WIDTH_IN, 5.6))
+    fig, ax = plt.subplots(figsize=(WIDTH_IN, 7.4))
     for y, x in enumerate(rows):
         s = x["signal_share"]["pooled"]
         g = ACCESS.index(ACCESS_OF[x["method"]])
@@ -99,9 +101,9 @@ def hero(results: dict, plt, theme: dict):
     ax.grid(axis="y", visible=False)
     keys = [plt.Line2D([], [], ls="none", marker=ACCESS_MARKERS[i], ms=9, color=theme["access"][i], label=name)
             for i, name in enumerate(ACCESS)]
-    ax.legend(handles=keys, loc="lower left", bbox_to_anchor=(-0.62, 1.0), ncol=2, handletextpad=0.2,
+    ax.legend(handles=keys, loc="lower left", bbox_to_anchor=(-0.62, 1.0), ncol=1, handletextpad=0.2,
               columnspacing=0.8, borderaxespad=0.2, title="the method needs", alignment="left")
-    ax.set_title("The more access to the network,\nthe more you recover", loc="left", pad=96,
+    ax.set_title("What a method needs from the network,\nand how much it recovers", loc="left", pad=150,
                  fontweight="bold", x=-0.62)
     return fig
 
@@ -133,7 +135,7 @@ def per_model(results: dict, plt, theme: dict):
     ax.tick_params(axis="x", length=0, pad=8)
     keys = [plt.Line2D([], [], ls="none", marker="o", ms=8, color=theme[k], label=name)
             for k, name in (("S", "synapse count"), ("P", "attribution patching"))]
-    ax.legend(handles=keys, loc="lower left", bbox_to_anchor=(-0.02, 1.0), ncol=2, handletextpad=0.1,
+    ax.legend(handles=keys, loc="lower left", bbox_to_anchor=(-0.02, 1.0), ncol=1, handletextpad=0.1,
               columnspacing=1.0, borderaxespad=0.2)
     # below every point of the untrained group (its lowest AUROC is far above 0.75), so it never covers data
     ax.text(3.625, 0.70, "patching at\nthe ceiling", ha="center", va="center", color=theme["muted"],
@@ -148,7 +150,7 @@ def per_model(results: dict, plt, theme: dict):
 
 
 FOREST = (("T5.1", "patching\nvs synapse count"), ("D^M1", "gradient\nvs synapse count"),
-          ("D^M3", "activity x weight\nvs synapse count"), ("T5.3", "synapse count,\ntrained vs untrained"),
+          ("D^M3", "|weights| x neuron\nactivity vs\nsynapse count"), ("T5.3", "synapse count,\ntrained vs untrained"),
           ("T5.4", "patching vs\nsynapse count,\nsecond stimulus set"))
 
 

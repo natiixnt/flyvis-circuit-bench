@@ -17,7 +17,9 @@ visual system.</b></p>
     <source media="(prefers-color-scheme: dark)" srcset="docs/figures/hero-dark.svg">
     <img alt="Share of the achievable signal, trained networks, 10 models, coloured by what the method needs:
     connectome only (class size 20%, synapse count 53%), trained weights (sum of weights 76%), forward pass
-    (SAE features 75%, activity 87%, activity x weight 88%), backward pass (gradient 92%, patching 97%)"
+    without learned weights (source activity only 43%, synapse count x source activity 67%), trained weights and
+    forward pass (|weights| x source SAE code 75%, |weights| x source activity 87%, |weights| x neuron activity
+    88%), backward pass (gradient 92%, patching 97%)"
     src="docs/figures/hero-light.svg" width="520">
   </picture>
 </p>
@@ -38,6 +40,10 @@ The question is how much the anatomy gives on its own.
   0.878), 49% of the gap that synapse count leaves.
 - **One backward pass gets you most of the way.** A single gradient reaches 92% (AUROC 0.961), against 97% for
   patching with 32 backward passes.
+- **Activity without learned weights adds little on its own.** The mean |activity| of the source cell type, with
+  no weights, recovers 43% (AUROC 0.715), less than synapse count. Synapse count times that activity recovers 67%
+  (AUROC 0.833), up from 53% but below the sum of |weights| (76%). This is the activity of the trained network
+  on held-out stimuli, not a recording from a fly; both rows were added after the preregistration.
 - **This SAE does not beat summing the weights.** Features of the one sparse autoencoder we fit reach AUROC
   0.873, the plain sum of |weights| 0.878.
 - **Refuted: training narrows the gap between patching and anatomy, it does not widen it.** On Spearman inside
@@ -67,13 +73,17 @@ were added after the preregistration and change no decision.
 |---|---|---|---|---|---|---|---|
 | attribution patching | 32 backward passes | 0.987 [0.985, 0.989] | 97% | 0.987 | 0.987 | 0.889 | 0.816 |
 | gradient | 1 backward pass | 0.961 [0.955, 0.967] | 92% | 0.961 | 0.961 | 0.804 | 0.715 |
-| activity x weight | forward pass | 0.939 [0.922, 0.955] | 88% | 0.932 | 0.945 | 0.667 | 0.608 |
-| activity | forward pass | 0.936 [0.918, 0.952] | 87% | 0.929 | 0.942 | 0.651 | 0.598 |
+| \|weights\| x neuron activity, per edge | trained weights + forward pass | 0.939 [0.922, 0.955] | 88% | 0.932 | 0.945 | 0.667 | 0.608 |
+| \|weights\| x source activity | trained weights + forward pass | 0.936 [0.918, 0.952] | 87% | 0.929 | 0.942 | 0.651 | 0.598 |
 | sum of \|weights\| | trained weights | 0.878 [0.855, 0.900] | 76% | 0.879 | 0.878 | 0.414 | 0.428 |
-| SAE features | forward pass + SAE fit | 0.873 [0.831, 0.904] | 75% | 0.859 | 0.888 | 0.488 | 0.474 |
+| \|weights\| x source SAE code | trained weights + forward pass + SAE fit | 0.873 [0.831, 0.904] | 75% | 0.859 | 0.888 | 0.488 | 0.474 |
+| synapse count x source activity † | connectome + forward pass, no learned weights | 0.833 [0.813, 0.854] | 67% | 0.827 | 0.839 | 0.314 | 0.316 |
 | synapse count | connectome only | 0.763 [0.737, 0.787] | 53% | 0.762 | 0.764 | 0.248 | 0.284 |
+| source activity only † | forward pass, no learned weights | 0.715 [0.687, 0.744] | 43% | 0.704 | 0.727 | 0.200 | 0.190 |
 | class size | connectome only | 0.601 [0.572, 0.633] | 20% | 0.599 | 0.603 | 0.150 | 0.187 |
 | truth ceiling | 604 ablations | 1.000 [0.999, 1.000] | 100% | 1.000 | 1.000 | 0.998 | 0.974 |
+
+† added after the study, not in the preregistered analysis.
 
 AUROC measures how well a method's ranking of the 604 classes separates the top 10% by ablation effect (61 classes).
 Share of signal = (AUROC - 0.5) / (ceiling - 0.5) per model: 0% is chance, 100% is as good as the truth agrees
@@ -162,8 +172,12 @@ minutes without a GPU; methods that need activations or gradients load the flyvi
    E(e) = mean over stimuli of ||r_e - r||² / ||r||². The binary truth is the top 10% of classes (61).
 2. **Methods rank the classes without seeing E.** Synapse count, sum of |weights| and class size use only the
    connectome and parameters. Attribution patching is a first-order estimate of the same effect from 32 random
-   output directions (32 backward passes instead of 604 ablations); the gradient uses one direction. Activity x
-   weight, activity and this SAE are computed from activity on held-out stimuli.
+   output directions (32 backward passes instead of 604 ablations); the gradient uses one direction.
+   |weights| x neuron activity (each edge's |weight| times the mean activity of its own source neuron),
+   |weights| x source activity (the class's sum of |weights| times the mean |activity| of the source cell type)
+   and |weights| x source SAE code are computed from the trained network's activity on held-out stimuli, with
+   the learned weights. Source activity only and synapse count x source activity use the same activity and no
+   learned weights; they were added after the preregistration.
 3. **Networks.** 10 trained models of the released flyvis ensemble, and the same networks at flyvis
    initialization (untrained). Metrics: AUROC (primary), AUPRC, Spearman, and Spearman inside the top 61, which
    does not saturate when AUROC is 1.
@@ -175,7 +189,7 @@ minutes without a GPU; methods that need activations or gradients load the flyvi
 [FlyHack](https://arxiv.org/abs/2610.13018) (Dhawan, 2026) ablates the same 604 connection classes in the same
 flyvis models 000-009 and scores integrated gradients and edge attribution patching against that truth;
 exhaustive ablation as ground truth is not new here. What this benchmark adds: how much anatomy alone recovers on
-one share-of-signal scale, a ladder of cheap proxies (weights, activity, this SAE, a gradient), trained against
+one share-of-signal scale, a ladder of cheap proxies (weights, activity with and without weights, this SAE, a gradient), trained against
 untrained networks with a refuted hypothesis, and a leaderboard. The readouts and truths differ (FlyHack: one
 decoded optical-flow number per behaviour, truth = top 20, averaged over 20 model x behaviour pairs; here: central
 column of every cell type, truth = top 61), so patching with zero ablation scores AUROC 0.927 there and 0.987 here; the results are complementary, not contradictory. Benchmarks with a known
@@ -254,7 +268,7 @@ If you use the benchmark, the measurements or the code, please cite (see also [C
   title   = {flyvis-circuit-bench: a benchmark of circuit-discovery methods
              against ablation ground truth in the flyvis connectome model},
   year    = {2026},
-  version = {1.0.0},
+  version = {1.0.1},
   url     = {https://github.com/natiixnt/flyvis-circuit-bench}
 }
 ```

@@ -1,6 +1,6 @@
 [project]
 name = "flyvis-circuit-bench"
-version = "1.0.0"
+version = "1.0.1"
 description = "Preregistered benchmark of circuit-discovery methods against ablation ground truth in the flyvis connectome model of the fly visual system."
 readme = "README.md"
 license = "MIT"

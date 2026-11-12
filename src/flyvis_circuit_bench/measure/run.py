@@ -8,8 +8,8 @@ tests can use it:
 
     ablation   ablation/<C>_<model>.npz      truth E (604 classes), synapse count, sum of |weights|, patching;
                                              1-3 hours on a laptop CPU, about 15 minutes on a recent GPU
-    cheap      cheap_methods/C1_<model>.npz  gradient (40 backward passes) and activity x weight (B'); minutes
-    sae        activity_sae/C1_<model>.npz   activity and SAE features (B', SAE fit in numpy); a few minutes
+    cheap      cheap_methods/C1_<model>.npz  gradient (40 backward passes) and |weights| x neuron activity (B'); minutes
+    sae        activity_sae/C1_<model>.npz   |weights| x source activity and SAE code (B', SAE in numpy); minutes
     structure  structure.npz                 class size (connectome only); seconds
 
 `cheap` and `sae` exist for trained networks only, as in the study. The second stimulus set (F2) has no
@@ -38,6 +38,9 @@ MEASURED_BY = {
     "M3": ("cheap", "cheap_methods/C1_{model}.npz", "M3"),
     "M_akt": ("sae", "activity_sae/C1_{model}.npz", "M_akt"),
     "M5": ("sae", "activity_sae/C1_{model}.npz", "M5"),
+    # no learned weights: computed from `a_typu` (and the synapse counts of the ablation file) by source_activity.py
+    "act": ("sae", "activity_sae/C1_{model}.npz", "a_typu"),
+    "S_act": ("sae", "activity_sae/C1_{model}.npz", "a_typu"),
     "size": ("structure", "structure.npz", "n_krawedzi"),
 }
 
@@ -124,7 +127,7 @@ def _movies_bprime(stimuli: Path, sintel_dir: Path | None, device: str):
 
 
 def measure_cheap(model: str, stimuli: Path, out: Path, device: str = "cpu", sintel_dir: Path | None = None) -> Path:
-    """Gradient (`M1`, on B) and activity x weight (`M3`, on B') of one trained model."""
+    """Gradient (`M1`, on B) and |weights| x neuron activity (`M3`, on B') of one trained model."""
     spec, items = N.load_stimuli(stimuli, sintel_dir)
     _, bp, movies_bp = _movies_bprime(stimuli, sintel_dir, device)
     ids = [i for i, _ in items]
@@ -151,7 +154,7 @@ def measure_cheap(model: str, stimuli: Path, out: Path, device: str = "cpu", sin
 
 def measure_activity_sae(model: str, stimuli: Path, out: Path, device: str = "cpu", sintel_dir: Path | None = None,
                          cfg: MT.SAEConfig = MT.SAE) -> Path:
-    """Activity (`M_akt`) and SAE features (`M5`) of one trained model, both on B'."""
+    """|weights| x source activity (`M_akt`) and |weights| x source SAE code (`M5`) of one trained model, both on B'."""
     _, bp, movies_bp = _movies_bprime(stimuli, sintel_dir, device)
     net = N.load_trained(model, device)
     cls = N.connection_classes(net)
@@ -202,7 +205,7 @@ def measure(what: str, condition: str, model: str, stimuli: Path, out: Path, dev
     else:
         steps = (what,)
     if condition != "C1" and set(steps) & {"cheap", "sae"}:
-        raise ValueError("gradient, activity x weight, activity and SAE features exist for trained networks only")
+        raise ValueError("gradient and the activity-based methods exist for trained networks only")
     out_paths = []
     for step in steps:
         if step == "ablation":

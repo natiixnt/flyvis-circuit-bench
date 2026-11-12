@@ -11,6 +11,7 @@ import warnings
 from pathlib import Path
 
 from . import __version__
+from .download import DATA_VERSION
 from .names import CONDITION_CODES
 
 DEFAULT_OWNER = "natiixnt"
@@ -163,7 +164,7 @@ def build_parser() -> argparse.ArgumentParser:
     d = sub.add_parser("download", help="download and verify the measurement package from a GitHub Release")
     d.add_argument("--owner", help=f"GitHub account hosting the release (default: FCB_OWNER or {DEFAULT_OWNER})")
     d.add_argument("--repo", default="flyvis-circuit-bench")
-    d.add_argument("--tag", default=f"v{__version__}")
+    d.add_argument("--tag", default=f"v{DATA_VERSION}")
     d.add_argument("--dest", type=Path, default=Path("data"))
     d.add_argument("--archive", type=Path, help="install from a local copy of the archive instead")
     d.add_argument("--sums", type=Path, help="release SHA256SUMS for --archive")
@@ -181,8 +182,9 @@ def build_parser() -> argparse.ArgumentParser:
     m = sub.add_parser("measure", help="re-measure the truth and every leaderboard method for one model "
                        "(needs the [measure] extra)")
     m.add_argument("--what", choices=("ablation", "cheap", "sae", "structure", "all"), default="ablation",
-                   help="ablation: truth, synapse count, sum of |weights|, patching; cheap: gradient, activity x "
-                   "weight; sae: activity, SAE features; structure: class size; all: every step")
+                   help="ablation: truth, synapse count, sum of |weights|, patching; cheap: gradient, |weights| x "
+                   "neuron activity; sae: |weights| x source activity, |weights| x source SAE code (and the data of "
+                   "the two rows without weights); structure: class size; all: every step")
     m.add_argument("--condition", choices=tuple(CONDITION_CODES), required=True,
                    help="trained (released checkpoint) or untrained (flyvis initialization)")
     m.add_argument("--model", required=True, help="model id of the flyvis ensemble flow/0000, e.g. 000")

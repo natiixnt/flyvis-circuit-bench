@@ -10,7 +10,7 @@ import json
 import math
 
 from .names import CONDITIONS as COND
-from .names import COST, DECISIONS, REFUTED_SENTENCE
+from .names import COST, DAGGER_NOTE, DECISIONS, REFUTED_SENTENCE
 from .names import METHODS as NAME
 
 
@@ -86,11 +86,14 @@ top 10% of the 604 connection classes by the ablation effect E (61 classes per m
 Networks: trained = the released flyvis models; untrained = the same networks at flyvis initialization.
 Discovery = models 000-004 (analysed first), replication = models 005-009 (analysed after the replication rules
 were fixed). Methods: synapse count of the class (anatomy), sum of |weights| of the class, attribution patching
-(32 random output directions), gradient (one direction), activity x weight (mean |synaptic current| on held-out
-stimuli), activity (sum of |weights| x mean |activity| of the source type on held-out stimuli), SAE features
-(sparse autoencoder), class size (number of neuron-to-neuron edges). "truth ceiling" = reliability of the truth
-itself: AUROC of E on one half of the stimuli against the truth from the other half. "top-61 Spearman" =
-Spearman with E inside the 61 positive classes, the one measure that does not saturate in untrained networks.
+(32 random output directions), gradient (one direction), |weights| x neuron activity (per edge: |weight| x mean
+activity of the individual source neuron on held-out stimuli, summed over the class), |weights| x source activity
+(sum of |weights| of the class x mean |activity| of the source cell type), |weights| x source SAE code (sum of
+|weights| x mean L1 norm of the sparse autoencoder code of the source type), source activity only (mean |activity|
+of the source type, no weights), synapse count x source activity (no learned weights), class size (number of
+neuron-to-neuron edges). "truth ceiling" = reliability of the truth itself: AUROC of E on one half of the
+stimuli against the truth from the other half. "top-61 Spearman" = Spearman with E
+inside the 61 positive classes, the one measure that does not saturate in untrained networks.
 The short codes of the measurement files are listed in [methodology.md](methodology.md#glossary).
 """
 
@@ -99,7 +102,7 @@ MEASURE = {"AUROC": "AUROC", "AUPRC": "AUPRC", "Spearman": "Spearman", "c1": "to
 CONTRAST = {
     "T5.1": "patching minus synapse count",
     "D^M1": "gradient minus synapse count",
-    "D^M3": "activity x weight minus synapse count",
+    "D^M3": "|weights| x neuron activity minus synapse count",
     "T5.3": "synapse count, trained minus untrained",
     "T5.4": "patching minus synapse count, second stimulus set",
     "G^M1": "gradient minus patching (cost of one backward pass)",
@@ -282,7 +285,7 @@ def render_leaderboard(lb: dict) -> list[str]:
     L = ["## 6. Leaderboard: every method on four metrics (10 models)", "",
          "AUROC is the preregistered primary metric. Share of signal = (AUROC - 0.5) / (ceiling - 0.5) per model, "
          "AUPRC and precision@61 (how many of the 61 most important classes are in the method's top 61) are "
-         "secondary metrics added after the preregistration; they change no decision.", ""]
+         "secondary metrics added after the preregistration; they change no decision. " + DAGGER_NOTE, ""]
     for c in ("C1", "C3"):
         for metric, label in (("AUROC", "AUROC"), ("signal_share", "share of signal"), ("AUPRC", "AUPRC"),
                               ("precision_at_61", "precision@61")):
@@ -318,7 +321,7 @@ def readme_facts(r: dict) -> dict[str, str]:
     dda = next(q for q in r["mechanism"] if q["key"] == "DD|AUROC")
     g = next(q for q in r["replication"]["versions"]["pooled"]["quantities"] if q["key"] == "G^M1")
     out = {}
-    for met in ("S", "A", "P", "M1", "M3", "M_akt", "M5", "size", "ceiling"):
+    for met in ("S", "A", "P", "M1", "M3", "M_akt", "M5", "act", "S_act", "size", "ceiling"):
         out[f"auroc_{met}"] = f(mm[f"C1|{met}"]["mean"])
         out[f"share_{met}"] = pct(lb[f"C1|{met}"]["signal_share"]["pooled"]["mean"])
         out[f"p61_{met}"] = f(lb[f"C1|{met}"]["precision_at_61"]["pooled"]["mean"])
@@ -343,7 +346,7 @@ def readme_facts(r: dict) -> dict[str, str]:
     out["dd_auroc_ci"] = ci(dda["ci_bootstrap"])
     out["dd_auroc_ci_t"] = ci(dda["ci_t"])
     out["spearman_untrained_weights"] = f(r["controls"]["K1"]["spearman_S_absw_C3"])
-    for met in ("S", "A", "P", "M1", "M3", "M_akt", "M5", "size", "ceiling"):
+    for met in ("S", "A", "P", "M1", "M3", "M_akt", "M5", "act", "S_act", "size", "ceiling"):
         a = lb[f"C1|{met}"]["AUROC"]
         out[f"auroc_ci_{met}"] = ci(a["pooled"]["ci_bootstrap"])
     # precision@61 as a count: how many of the 61 most important classes synapse count puts in its top 61

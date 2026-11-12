@@ -133,7 +133,7 @@ choice of methods and thresholds).
 | decision | quantity | rule | undetermined |
 |---|---|---|---|
 | 1. patching beats synapse count | gap in trained networks, all 10 models | "survives": both lower bounds > 0, (ceiling - AUROC(synapse count)) > 0.05 and Holm; "refuted": both upper bounds < 0; otherwise "inconclusive" | >= 5 of 10 missing |
-| 2. cheap methods beat synapse count | gradient minus synapse count and activity x weight minus synapse count | "cheap methods survive": both positive and Holm; "partial": one positive; "refuted": none positive and >= 1 negative; otherwise "inconclusive" | as decision 1 for either |
+| 2. cheap methods beat synapse count | gradient minus synapse count and |weights| x neuron activity, per edge (called "activity x weight" in v1.0.0) minus synapse count | "cheap methods survive": both positive and Holm; "partial": one positive; "refuted": none positive and >= 1 negative; otherwise "inconclusive" | as decision 1 for either |
 | 3. training lowers the AUROC of synapse count (claim 1) | AUROC(synapse count, trained) - AUROC(synapse count, untrained) | "survives": negative and Holm; "refuted": positive; otherwise "inconclusive" | no untrained pairs for new models |
 | 4. patching beats synapse count on the second stimulus set | the gap against E on the second set, models valid on it | as decision 1 with the ceiling of the second set (one half against the other) | >= half of the models without a valid second set |
 
@@ -229,3 +229,12 @@ Every change after the preregistration, with its date and reason. Changes made a
    discovery analysis, now for every method and all 10 models); and precision@61, how many of the 61 most
    important classes are in the method's top 61 (new). They were chosen after the results were known, they
    reframe the same rankings and they change no decision.
+9. **2026-11-12, two methods without learned weights and corrected names, after all data and all decisions.**
+   Two rows were added to the leaderboard: source activity only (the mean |activity| of the source cell type of
+   a class, no weights) and synapse count x source activity. Both are computed from files already in the
+   measurement package (`a_typu` in `activity_sae/` and the synapse counts of `ablation/`), with no new
+   measurement. The activity is that of the trained flyvis network on the held-out stimuli B',
+   not a recording from a fly. They were not preregistered, they change no decision, and they are secondary
+   to the preregistered comparisons. Separately, v1.0.0 had labelled two weight-scaled methods "activity" and
+   "SAE features"; they multiply by the sum of |weights| of the class and are now named |weights| x source
+   activity and |weights| x source SAE code. The numbers did not change. Decision 2 compares the same quantity as before the rename (same data key, listed in the code table of the methodology): the sum over the edges of a class of |weight| x mean activity of the edge's own source neuron, with the formula of the preregistered appendix.

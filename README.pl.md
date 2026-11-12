@@ -17,8 +17,9 @@ ograniczonym konektomem.</b></p>
     <source media="(prefers-color-scheme: dark)" srcset="docs/figures/hero-dark.svg">
     <img alt="Udział osiągalnego sygnału, sieci wytrenowane, 10 modeli, kolor według tego, czego metoda
     potrzebuje: sam konektom (wielkość klasy 20%, liczba synaps 53%), wytrenowane wagi (suma wag 76%), przejście
-    w przód (cechy SAE 75%, aktywność 87%, aktywność razy waga 88%), przejście wstecz (gradient 92%, patching
-    97%)" src="docs/figures/hero-light.svg" width="520">
+    w przód bez wyuczonych wag (sama aktywność źródła 43%, liczba synaps razy aktywność źródła 67%), wytrenowane
+    wagi i przejście w przód (|wagi| razy kod SAE źródła 75%, |wagi| razy aktywność źródła 87%, |wagi| razy
+    aktywność neuronu 88%), przejście wstecz (gradient 92%, patching 97%)" src="docs/figures/hero-light.svg" width="520">
   </picture>
 </p>
 
@@ -41,6 +42,10 @@ daje sama anatomia.
   czyli 49% luki, którą zostawia liczba synaps.
 - **Jedno przejście wstecz daje prawie wszystko.** Pojedynczy gradient osiąga 92% (AUROC 0.961), wobec 97% dla
   patchingu z 32 przejściami wstecz.
+- **Sama aktywność, bez wyuczonych wag, niewiele daje.** Średnia |aktywność| typu źródłowego, bez żadnych wag,
+  odzyskuje 43% (AUROC 0.715), mniej niż liczba synaps. Liczba synaps razy ta aktywność odzyskuje 67% (AUROC
+  0.833), czyli więcej niż 53%, ale mniej niż suma |wag| (76%). To aktywność wytrenowanej sieci na odłożonych
+  bodźcach, nie nagranie z muchy; oba wiersze dodano po prerejestracji.
 - **Ten SAE nie bije zwykłej sumy wag.** Cechy jedynego rzadkiego autoenkodera, którego dopasowaliśmy, osiągają
   AUROC 0.873, zwykła suma |wag| 0.878.
 - **Obalone: trening zmniejsza przewagę patchingu nad anatomią, a nie ją zwiększa.** Na Spearmanie wewnątrz
@@ -70,13 +75,17 @@ dodaliśmy po prerejestracji i nie zmieniają żadnej decyzji.
 |---|---|---|---|---|---|---|---|
 | attribution patching | 32 backward passes | 0.987 [0.985, 0.989] | 97% | 0.987 | 0.987 | 0.889 | 0.816 |
 | gradient | 1 backward pass | 0.961 [0.955, 0.967] | 92% | 0.961 | 0.961 | 0.804 | 0.715 |
-| activity x weight | forward pass | 0.939 [0.922, 0.955] | 88% | 0.932 | 0.945 | 0.667 | 0.608 |
-| activity | forward pass | 0.936 [0.918, 0.952] | 87% | 0.929 | 0.942 | 0.651 | 0.598 |
+| \|weights\| x neuron activity, per edge | trained weights + forward pass | 0.939 [0.922, 0.955] | 88% | 0.932 | 0.945 | 0.667 | 0.608 |
+| \|weights\| x source activity | trained weights + forward pass | 0.936 [0.918, 0.952] | 87% | 0.929 | 0.942 | 0.651 | 0.598 |
 | sum of \|weights\| | trained weights | 0.878 [0.855, 0.900] | 76% | 0.879 | 0.878 | 0.414 | 0.428 |
-| SAE features | forward pass + SAE fit | 0.873 [0.831, 0.904] | 75% | 0.859 | 0.888 | 0.488 | 0.474 |
+| \|weights\| x source SAE code | trained weights + forward pass + SAE fit | 0.873 [0.831, 0.904] | 75% | 0.859 | 0.888 | 0.488 | 0.474 |
+| synapse count x source activity † | connectome + forward pass, no learned weights | 0.833 [0.813, 0.854] | 67% | 0.827 | 0.839 | 0.314 | 0.316 |
 | synapse count | connectome only | 0.763 [0.737, 0.787] | 53% | 0.762 | 0.764 | 0.248 | 0.284 |
+| source activity only † | forward pass, no learned weights | 0.715 [0.687, 0.744] | 43% | 0.704 | 0.727 | 0.200 | 0.190 |
 | class size | connectome only | 0.601 [0.572, 0.633] | 20% | 0.599 | 0.603 | 0.150 | 0.187 |
 | truth ceiling | 604 ablations | 1.000 [0.999, 1.000] | 100% | 1.000 | 1.000 | 0.998 | 0.974 |
+
+† dodane po badaniu, poza zarejestrowaną analizą.
 
 AUROC mierzy, jak dobrze ranking 604 klas według metody oddziela górne 10% według efektu ablacji (61 klas).
 Udział sygnału (share of signal) = (AUROC - 0.5) / (sufit - 0.5) w każdym modelu: 0% to przypadek, 100% to
@@ -165,8 +174,12 @@ minut bez GPU; metody, które potrzebują aktywacji albo gradientów, ładują m
    E(e) = średnia po bodźcach z ||r_e - r||² / ||r||². Prawda binarna to górne 10% klas (61).
 2. **Metody szeregują klasy bez wglądu w E.** Liczba synaps, suma |wag| i wielkość klasy korzystają tylko z
    konektomu i parametrów. Attribution patching to przybliżenie pierwszego rzędu tego samego efektu z 32 losowych
-   kierunków wyjścia (32 przejścia wstecz zamiast 604 ablacji); gradient używa jednego kierunku. Aktywność razy
-   waga, aktywność i ten SAE liczymy z aktywności na odłożonych bodźcach.
+   kierunków wyjścia (32 przejścia wstecz zamiast 604 ablacji); gradient używa jednego kierunku.
+   |Wagi| razy aktywność neuronu (|waga| każdej krawędzi razy średnia aktywność jej neuronu źródłowego), |wagi|
+   razy aktywność źródła (suma |wag| klasy razy średnia |aktywność| typu źródłowego) i |wagi| razy kod SAE
+   źródła liczymy z aktywności wytrenowanej sieci na odłożonych bodźcach, z wyuczonymi wagami. Sama aktywność
+   źródła i liczba synaps razy aktywność źródła używają tej samej aktywności i żadnych wyuczonych wag; dodano
+   je po prerejestracji.
 3. **Sieci.** 10 wytrenowanych modeli z opublikowanego zespołu flyvis i te same sieci po inicjalizacji flyvis
    (niewytrenowane). Miary: AUROC (główna), AUPRC, Spearman oraz Spearman wewnątrz górnych 61, który nie nasyca
    się, gdy AUROC wynosi 1.
@@ -178,7 +191,7 @@ minut bez GPU; metody, które potrzebują aktywacji albo gradientów, ładują m
 [FlyHack](https://arxiv.org/abs/2610.13018) (Dhawan, 2026) usuwa te same 604 klasy połączeń w tych samych
 modelach flyvis 000-009 i ocenia względem tej prawdy integrated gradients i edge attribution patching;
 wyczerpująca ablacja jako prawda nie jest tu nowością. Co dodaje ten benchmark: ile odzyskuje sama anatomia na
-jednej skali udziału sygnału, drabinkę tanich przybliżeń (wagi, aktywność, ten SAE, gradient), sieci
+jednej skali udziału sygnału, drabinkę tanich przybliżeń (wagi, aktywność z wagami i bez, ten SAE, gradient), sieci
 wytrenowane kontra niewytrenowane z obaloną hipotezą i ranking. Odczyty i prawdy są różne (FlyHack: jedna
 zdekodowana liczba przepływu optycznego na zachowanie, prawda = górne 20, średnia po 20 parach model x zachowanie;
 tutaj: centralna kolumna każdego typu komórki, prawda = górne 61), więc patching z zerowaniem osiąga tam AUROC
@@ -257,7 +270,7 @@ Jeśli korzystasz z benchmarku, pomiarów albo kodu, prosimy o cytowanie (zob. t
   title   = {flyvis-circuit-bench: a benchmark of circuit-discovery methods
              against ablation ground truth in the flyvis connectome model},
   year    = {2026},
-  version = {1.0.0},
+  version = {1.0.1},
   url     = {https://github.com/natiixnt/flyvis-circuit-bench}
 }
 ```

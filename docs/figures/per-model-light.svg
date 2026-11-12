@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="412.958984pt" height="362.268609pt" viewBox="0 0 412.958984 362.268609" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="346.135859pt" height="362.268609pt" viewBox="0 0 346.135859 362.268609" xmlns="http://www.w3.org/2000/svg" version="1.1">
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
@@ -16,8 +16,8 @@
  <g id="figure_1">
   <g id="patch_1">
    <path d="M 0 362.268609 
-L 412.958984 362.268609 
-L 412.958984 0 
+L 346.135859 362.268609 
+L 346.135859 0 
 L 0 0 
 z
 " style="fill: #ffffff"/>
@@ -2313,12 +2313,12 @@ z
 " style="stroke: #d55e00"/>
      </defs>
      <g>
-      <use xlink:href="#mbc326ac79c" x="76.915859" y="57.749922" style="fill: #d55e00; stroke: #d55e00"/>
+      <use xlink:href="#mbc326ac79c" x="76.915859" y="35.24875" style="fill: #d55e00; stroke: #d55e00"/>
      </g>
     </g>
     <g id="text_12">
      <!-- synapse count -->
-     <g style="fill: #1f2328" transform="translate(93.415859 62.999922) scale(0.15 -0.15)">
+     <g style="fill: #1f2328" transform="translate(93.415859 40.49875) scale(0.15 -0.15)">
       <defs>
        <path id="DejaVuSans-5c" d="M 2059 -325 
 Q 1816 -950 1584 -1140 
@@ -2368,12 +2368,12 @@ z
 " style="stroke: #0072b2"/>
      </defs>
      <g>
-      <use xlink:href="#m128d1ef892" x="232.458828" y="57.749922" style="fill: #0072b2; stroke: #0072b2"/>
+      <use xlink:href="#m128d1ef892" x="76.915859" y="57.749922" style="fill: #0072b2; stroke: #0072b2"/>
      </g>
     </g>
     <g id="text_13">
      <!-- attribution patching -->
-     <g style="fill: #1f2328" transform="translate(248.958828 62.999922) scale(0.15 -0.15)">
+     <g style="fill: #1f2328" transform="translate(93.415859 62.999922) scale(0.15 -0.15)">
       <use xlink:href="#DejaVuSans-44"/>
       <use xlink:href="#DejaVuSans-57" transform="translate(61.28125 0)"/>
       <use xlink:href="#DejaVuSans-57" transform="translate(100.484375 0)"/>

@@ -32,7 +32,7 @@ Trained (`C1_`) and untrained (`C3_`) networks, models 000-009.
 | key | shape | meaning |
 |---|---|---|
 | gradient | 604 | attribution patching along one direction (the normalized response) |
-| activity x weight | 604 | mean \|input current through the class\| on held-out stimuli B' |
+| \|weights\| x neuron activity | 604 | mean \|input current through the class\| on held-out stimuli B' |
 | `M3v` | 604 | variance of that current (secondary) |
 | `M1_b` | 40 x 604 | gradient per stimulus |
 | `fbar` | 45669 | mean activity of every neuron on B' |
@@ -43,9 +43,9 @@ Trained (`C1_`) and untrained (`C3_`) networks, models 000-009.
 
 | key | shape | meaning |
 |---|---|---|
-| activity | 604 | sum of \|weights\| x mean \|activity\| of the source type on B' |
-| SAE features | 604 | sparse autoencoder score |
-| `g`, `a_typu`, `rho_*`, `n_*`, `AUROC_typu`, `lambda`, `FVU`, `FVU_siatka`, `mu`, `sd`, `n_uczace`, `n_walidacja` | | SAE diagnostics: per-type scores, alignment of features with cell types, chosen sparsity, fraction of variance unexplained on a grid, normalization, train and validation sizes |
+| \|weights\| x source activity | 604 | sum of \|weights\| x mean \|activity\| of the source type on B' |
+| \|weights\| x source SAE code | 604 | sum of \|weights\| x mean L1 norm of the sparse autoencoder code of the source type |
+| `g`, `a_typu` (mean \|activity\| of each of the 65 cell types on B', the input of the two rows added in v1.0.1), `rho_*`, `n_*`, `AUROC_typu`, `lambda`, `FVU`, `FVU_siatka`, `mu`, `sd`, `n_uczace`, `n_walidacja` | | SAE diagnostics: per-type scores, alignment of features with cell types, chosen sparsity, fraction of variance unexplained on a grid, normalization, train and validation sizes |
 | ACDC circuit, `delta`, `obwod`, `kolejnosc`, `H`, `bodzce_M4` | | models 000-004 only: ACDC circuit (discovery analysis; not part of the published tables) |
 
 ## f2/C1_<model>.npz

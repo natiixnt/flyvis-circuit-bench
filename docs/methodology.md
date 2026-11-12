@@ -34,7 +34,7 @@ parameter unchanged.
   `RenderedSintel` (3 vertical splits per sequence, 19 frames, resampled to dt = 0.02 s). The list and a random
   split into halves B1 and B2 (seed 20261101) were frozen before the first ablation (`stimuli_B.json` in the
   measurement package).
-- **Held-out set B':** a disjoint set used only by the activity-based methods (activity x weight, activity, SAE
+- **Held-out set B':** a disjoint set used only by the activity-based methods (|weights| x neuron activity, |weights| x source activity, |weights| x source SAE code, source activity only, synapse count x source activity, SAE
   features), so they never see the stimuli of the truth.
 - **Second stimulus set (added for the replication):** 24 moving bars (flyvis `MovingBar`, width 4, speed 13,
   angles 7 + 30k degrees, ON and OFF, 74 frames each), disjoint from B and B' in shape, speed, angle and
@@ -66,9 +66,9 @@ Every method ranks the 604 classes without access to E.
 | class size | number of neuron-to-neuron edges in the class | none |
 | attribution patching | mean over stimuli b and K = 32 random directions v_k ~ N(0, I) of (s_e x d(v_k . r)/d s_e)² / \|\|r(b)\|\|², an unbiased estimator of the squared first-order change of the output | 1 forward, 32 backward passes per stimulus |
 | gradient | the same with one direction, the normalized response itself | 1 forward, 1 backward per stimulus |
-| activity x weight | mean over B' and time of \|input current through the class\| (weight x source activity) | 1 forward on B' |
-| activity | sum of \|weights\| x mean \|activity\| of the source type on B' | 1 forward on B' |
-| SAE features | features of this SAE (one configuration, see below) trained on activations on B', mapped to classes | 1 forward + SAE fit |
+| \|weights\| x neuron activity, per edge | mean over B' and time of \|input current through the class\|: sum over the edges of the class of \|weight\| x mean activity of that edge's own source neuron | 1 forward on B' |
+| \|weights\| x source activity | sum of \|weights\| of the class x mean \|activity\| of the source cell type on B' (one value per type, so every edge of a class gets the same activity) | 1 forward on B' |
+| \|weights\| x source SAE code | sum of \|weights\| of the class x mean L1 norm of the code of the source type; features of this SAE (one configuration, see below) trained on activations on B', mapped to classes | 1 forward + SAE fit |
 
 Random directions use `numpy.random.default_rng([20261101, b])` per stimulus b, so the first k directions do not
 depend on K.
@@ -171,8 +171,8 @@ uv run fcb measure --what all --condition trained --model 000 --stimuli data/mea
 | step | file | methods | cost |
 |---|---|---|---|
 | `ablation` | `ablation/C1_000.npz` | truth (E on B, B1, B2, relative effects), synapse count, sum of \|weights\|, attribution patching | 604 ablations x 40 stimuli: 1 to 3 hours on a laptop CPU, about 15 minutes on a recent GPU |
-| `cheap` | `cheap_methods/C1_000.npz` | gradient (on B), activity x weight (on B') | minutes |
-| `sae` | `activity_sae/C1_000.npz` | activity, SAE features (on B'; the SAE configuration is stored in `meta`) | minutes |
+| `cheap` | `cheap_methods/C1_000.npz` | gradient (on B), \|weights\| x neuron activity (on B') | minutes |
+| `sae` | `activity_sae/C1_000.npz` | \|weights\| x source activity, \|weights\| x source SAE code (on B'; the SAE configuration is stored in `meta`) | minutes |
 | `structure` | `structure.npz` | class size (connectome only) | seconds |
 
 The 40 stimuli of B' ship with the code (`src/flyvis_circuit_bench/measure/stimuli_Bprime.json`, byte-identical
@@ -182,8 +182,8 @@ leave out secondary arrays of the study that no table uses (variants of the meth
 SAE).
 
 Check against the package, model 000 on Apple silicon (MPS), steps `cheap`, `sae` and `structure` in 6 minutes:
-class size is byte-identical. Gradient, activity x weight and activity agree within float32 (largest difference
-2.8e-6 of the largest score), with the same AUROC to every digit and the same top 61 classes. SAE features agree
+class size is byte-identical. Gradient, |weights| x neuron activity and |weights| x source activity agree within float32 (largest difference
+2.8e-6 of the largest score), with the same AUROC to every digit and the same top 61 classes. |weights| x source SAE code agrees
 within 1.1e-3 of the largest score (the 50 epochs of the SAE fit amplify float32 differences of its input), AUROC
 0.9126 against 0.9125, same top 61. On identical input the code gives the same bytes as the study code.
 
@@ -201,9 +201,9 @@ only place in the documentation that uses them.
 | sum of \|weights\| | `A` | array key, JSON keys |
 | attribution patching | `P` (`P_F2` on the second stimulus set) | array keys, JSON keys |
 | gradient (one backward pass) | `M1` (`M1_F2`) | `cheap_methods/` |
-| activity x weight | `M3` (`M3v`: its variance) | `cheap_methods/` |
-| activity | `M_akt` | `activity_sae/` |
-| SAE features | `M5` | `activity_sae/` |
+| \|weights\| x neuron activity | `M3` (`M3v`: its variance) | `cheap_methods/` |
+| \|weights\| x source activity | `M_akt` | `activity_sae/` |
+| \|weights\| x source SAE code | `M5` | `activity_sae/` |
 | mean-substitution patching (models 000-004, not in the tables) | `M2` | `cheap_methods/` |
 | ACDC circuit (models 000-004, not in the tables) | `M4` | `activity_sae/` |
 | class size | `size`, `n_krawedzi` | JSON keys, `structure.npz` |

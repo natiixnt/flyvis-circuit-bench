@@ -19,12 +19,14 @@ from . import __version__
 from .data import CHECKSUMS, read_checksums, verify
 
 REPO = "flyvis-circuit-bench"
-PACKAGE = f"measurements-v{__version__}"
+# The measurement package is unchanged since v1.0.0 (same sha256) and stays attached to that release.
+DATA_VERSION = "1.0.0"
+PACKAGE = f"measurements-v{DATA_VERSION}"
 ASSET = f"{PACKAGE}.tar.gz"
 USER_AGENT = f"{REPO}/{__version__}"
 
 
-def release_url(owner: str, name: str, repo: str = REPO, tag: str = f"v{__version__}") -> str:
+def release_url(owner: str, name: str, repo: str = REPO, tag: str = f"v{DATA_VERSION}") -> str:
     if not owner or "/" in owner or owner.strip() != owner:
         raise ValueError("--owner must be a GitHub account or organization name")
     return f"https://github.com/{owner}/{repo}/releases/download/{tag}/{name}"
@@ -94,7 +96,7 @@ def install(archive: Path, sums_text: str | None, dest_parent: Path) -> Path:
     return target
 
 
-def download(owner: str, dest_parent: Path, repo: str = REPO, tag: str = f"v{__version__}") -> Path:
+def download(owner: str, dest_parent: Path, repo: str = REPO, tag: str = f"v{DATA_VERSION}") -> Path:
     """Fetch the release asset and its SHA256SUMS, verify, extract; returns the package directory."""
     dest_parent = Path(dest_parent)
     dest_parent.mkdir(parents=True, exist_ok=True)

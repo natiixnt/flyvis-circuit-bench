@@ -71,7 +71,7 @@ def test_hero_values_are_the_leaderboard_shares(results_json):
     assert points == sorted(s["mean"] for s in shares)
     assert labels == sorted(pct(s["mean"]) for s in shares)
     assert intervals == sorted(tuple(s["ci_bootstrap"]) for s in shares)
-    assert len(points) == 8
+    assert len(points) == 10  # the 8 methods of v1.0.0 and the 2 without learned weights added in v1.0.1
 
 
 def _covered(ax, renderer) -> list:

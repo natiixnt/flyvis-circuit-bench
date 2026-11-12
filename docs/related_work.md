@@ -15,7 +15,8 @@ before us.** What this benchmark adds:
 
 - **How much anatomy alone recovers,** on one scale for every method: the share of the achievable signal, from
   0% (chance) to 100% (the truth agreeing with itself across two halves of the stimuli).
-- **A ladder of cheap proxies** between anatomy and patching: trained weights, activity, activity x weight,
+- **A ladder of cheap proxies** between anatomy and patching: trained weights, activity with and without weights (source activity only, synapse count x source
+  activity, |weights| x source activity, |weights| x neuron activity),
   this SAE and a single gradient, each with the access to the network it needs.
 - **Trained against untrained networks,** with a preregistered mechanism hypothesis that the data refuted
   (negative result 1 in [limitations.md](limitations.md#negative-results)).

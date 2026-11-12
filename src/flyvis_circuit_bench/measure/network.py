@@ -384,7 +384,7 @@ def load_stimuli(spec_path: Path, sintel_dir: Path | None = None) -> tuple[dict,
     return spec, movies_of(spec, spec["bodzce"], sintel_dir)
 
 
-# The 40 stimuli B' of activity x weight, activity and SAE features: moving edges at 15 + 30k degrees and Sintel
+# The 40 stimuli B' of the activity-based methods with learned weights: moving edges at 15 + 30k degrees and Sintel
 # sequences not in B (disjoint from the truth). Shipped with the code, byte-identical to the file of the study.
 STIMULI_BPRIME = Path(__file__).with_name("stimuli_Bprime.json")
 SHA256_BPRIME = "5147e040888a9ab019db8623655a0166df37d5dd3f50e060498956ee7b571cd2"

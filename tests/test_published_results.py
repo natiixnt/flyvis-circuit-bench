@@ -35,9 +35,10 @@ def test_reproduce_matches_committed_results(tmp_path):
 
 READMES = ["README.md", "README.pl.md"]
 TLDR_FACTS = ("share_P", "auroc_P", "share_S", "auroc_S", "p61_count_S", "share_A", "auroc_A", "gap_closed_A",
-              "share_M1", "auroc_M1", "auroc_M5", "dd_top61")
+              "share_M1", "auroc_M1", "auroc_M5", "dd_top61",
+              "auroc_act", "share_act", "auroc_S_act", "share_S_act")
 # Numbers in the README prose that are not results: versions, sizes, constants of the method, citation, years.
-NOT_RESULTS = {"1.0.0", "38.5", "3.11", "3.12", "3.13", "0.01", "0.5", "1132", "1140", "634", "2024", "2026",
+NOT_RESULTS = {"1.0.0", "1.0.1", "38.5", "3.11", "3.12", "3.13", "0.01", "0.5", "1132", "1140", "634", "2024", "2026",
                "604", "61", "10", "32", "40", "24", "16", "000", "004", "005", "009", "5", "4", "1", "0", "100%", "0%",
                "20261101", "10%", "95%", "4.0", "440", "520"}
 # Numbers quoted from other papers (docs/related_work.md gives the source and page of each).

@@ -58,7 +58,8 @@ def build_package(root: Path, seed: int = 7, p_noise: float = 0.15) -> Path:
                 np.savez(root / "cheap_methods" / f"C1_{m}.npz", M1=_noisy(rng, e, 0.3), M3=_noisy(rng, e, 0.4),
                          meta=json.dumps({}))
                 np.savez(root / "activity_sae" / f"C1_{m}.npz", M_akt=_noisy(rng, e, 0.45),
-                         M5=_noisy(rng, e, 0.6), zrodlo=src, cel=tgt, meta=json.dumps({}))
+                         M5=_noisy(rng, e, 0.6), zrodlo=src, cel=tgt, meta=json.dumps({}),
+                         a_typu=0.5 + 1.5 * ((np.arange(65) * 37) % 65) / 65)
                 bars = rng.lognormal(-6, 1.5, size=(N_CLASSES, 1)) * rng.lognormal(0, 0.2, size=(N_CLASSES, N_BARS))
                 e2 = bars.mean(axis=1)
                 np.savez(root / "f2" / f"C1_{m}.npz", E_F2=e2, E_F2a=bars[:, :12].mean(axis=1),

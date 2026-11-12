@@ -17,7 +17,7 @@ Reported with the same weight as the main result. Numbers come from [results.md]
    -0.026 AUROC to patching [-0.033, -0.019 | t -0.035, -0.017] with 10 models; non-inferiority within a margin of
    0.03 was not shown with 5 models (lower t bound -0.043).
 3. **This SAE does not beat plain weights.** Its features reach AUROC 0.873 [0.831, 0.904] vs
-   sum of |weights| 0.878 [0.855, 0.900] and activity 0.936 (10 models). Study only: SAE features did not align
+   sum of |weights| 0.878 [0.855, 0.900] and |weights| x source activity 0.936 (10 models). Study only: SAE features (the codes themselves) did not align
    with cell types, and ACDC (automatic circuit discovery on classes) cost more than patching without beating
    synapse counts. It is one configuration (described in
    [methodology.md](methodology.md#methods)); other dictionary sizes, penalties or inputs were not tried.

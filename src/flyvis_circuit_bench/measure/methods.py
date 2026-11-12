@@ -1,15 +1,16 @@
-"""Activity x weight, activity and SAE features: the parts that need no flyvis and no torch (numpy only).
+"""The three activity-based methods with learned weights; the parts that need no flyvis and no torch (numpy)
 
 The network side (all-node activity, the gradient method) is in `network.py`, the file writers in `run.py`.
 Definitions, as in the study (docs/methodology.md):
 
-- activity x weight (`M3`): sum over the edges j of a class of |w_j| * mean_b mean_t relu(V_src(j)), over the 40
-  stimuli of B' (disjoint from the truth stimuli B);
-- activity (`M_akt`): sum of |weights| of the class x mean |activity| of the neurons of its source type, over every
-  time step of B';
-- SAE features (`M5`): sum of |weights| of the class x mean L1 norm of the sparse-autoencoder code of the neurons of
-  its source type. The SAE input is one row per neuron: mean, std, max and min of its activity over time on each of
-  the 40 stimuli of B' (160 numbers), standardized with the training neurons. Configuration: `SAEConfig`.
+- |weights| x neuron activity (`M3`): sum over the edges j of a class of |w_j| * mean_b mean_t relu(V_src(j)),
+  over the 40 stimuli of B' (disjoint from the truth stimuli B);
+- |weights| x source activity (`M_akt`): sum of |weights| of the class x mean |activity| of the neurons of its
+  source type, over every time step of B';
+- |weights| x source SAE code (`M5`): sum of |weights| of the class x mean L1 norm of the sparse-autoencoder code
+  of the neurons of its source type. The SAE input is one row per neuron: mean, std, max and min of its
+  activity over time on each of the 40 stimuli of B' (160 numbers), standardized with the training neurons.
+  Configuration: `SAEConfig`.
 
 The formulas keep the operation order of the study code, so the same activities give the same bits.
 """
@@ -51,11 +52,11 @@ def relu(x):
     return np.maximum(x, 0.0)
 
 
-# ---------------------------------------------------------------- activity x weight (M3)
+# ---------------------------------------------------------------- |weights| x neuron activity (M3)
 
 
 class ActivityAccumulator:
-    """Streaming mean relu activity per neuron (f-bar) and activity x weight, one stimulus at a time.
+    """Streaming mean relu activity per neuron (f-bar) and |weights| x neuron activity, one stimulus at a time.
 
     w: weight of every edge (sign x synapse count x scale), src: source node of every edge, cls: class of every
     edge. Every stimulus has the same weight; stimuli of the truth set B must not be added (`skip`)."""

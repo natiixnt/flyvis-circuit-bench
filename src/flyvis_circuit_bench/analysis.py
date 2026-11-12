@@ -27,6 +27,7 @@ import numpy as np
 
 from . import metrics as M
 from .data import CONDITIONS, MODELS_ORIGINAL, MODELS_POOLED, MODELS_REPLICATION
+from .source_activity import source_activity, synapses_x_activity
 from .stats import NEGATIVE, POSITIVE, UNDETERMINED, Summary, holm, one_sided_p, summarize
 
 VERSIONS = {"pooled": MODELS_POOLED, "original": MODELS_ORIGINAL, "replication": MODELS_REPLICATION}
@@ -161,7 +162,10 @@ def c1_scores(d: dict, size: np.ndarray | None) -> dict[str, np.ndarray]:
     if "M13" in d:
         scores.update({"M1": d["M13"]["M1"], "M3": d["M13"]["M3"]})
     if "M5" in d:
-        scores.update({"M_akt": d["M5"]["M_akt"], "M5": d["M5"]["M5"]})
+        m5 = d["M5"]
+        scores.update({"M_akt": m5["M_akt"], "M5": m5["M5"],
+                       "act": source_activity(m5["zrodlo"], m5["a_typu"]),
+                       "S_act": synapses_x_activity(b["S"], m5["zrodlo"], m5["a_typu"])})
     if size is not None:
         scores["size"] = size
     return scores
@@ -358,7 +362,8 @@ def replication(data: dict) -> tuple[dict, dict]:
 def method_means(mm: dict) -> list[dict]:
     rows = []
     mf2 = {m: x for m, x in mm.items() if "F2" in x}
-    for src, methods, pool in (("C1", ("S", "A", "P", "M1", "M3", "M_akt", "M5", "size", "ceiling"), mm),
+    c1_methods = ("S", "A", "P", "M1", "M3", "M_akt", "M5", "act", "S_act", "size", "ceiling")
+    for src, methods, pool in (("C1", c1_methods, mm),
                                ("F2", ("S", "A", "P_F2", "M1_F2", "size", "ceiling"), mf2)):
         for met in methods:
             q = quantity(_per_model(pool, lambda x, s=src, me=met: x[s][me]), MODELS_POOLED)
@@ -368,7 +373,7 @@ def method_means(mm: dict) -> list[dict]:
 
 # ---------------------------------------------------------------- leaderboard (added after the preregistration)
 
-LEADERBOARD = ("P", "M1", "M3", "M_akt", "A", "M5", "S", "size")
+LEADERBOARD = ("P", "M1", "M3", "M_akt", "A", "M5", "S_act", "act", "S", "size")
 TABLE_METRICS = ("AUROC", "signal_share", "AUPRC", "precision_at_61")
 
 
