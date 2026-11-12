@@ -1,0 +1,25 @@
+name: New method or analysis
+description: Propose a method to benchmark or an additional analysis
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposal
+      description: The method or analysis, how it scores the 604 connection classes, and its cost.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - new circuit-discovery method
+        - new control or baseline
+        - replication (other models, stimuli or connectome)
+        - other
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: References, expected result, anything else. New analyses are exploratory and do not replace the preregistered decisions.

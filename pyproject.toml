@@ -1,0 +1,62 @@
+[project]
+name = "flyvis-circuit-bench"
+version = "1.0.0"
+description = "Preregistered benchmark of circuit-discovery methods against ablation ground truth in the flyvis connectome model of the fly visual system."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "LICENSE-data"]
+authors = [{ name = "Natalia Szczepanik" }]
+requires-python = ">=3.11"
+keywords = ["connectome", "interpretability", "circuit discovery", "attribution patching", "flyvis", "benchmark"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+# Measurement path (re-running ablations and attribution patching). Heavy: torch + flyvis, hours of compute.
+measure = [
+    "flyvis==1.2.0",
+    "torch>=2.2",
+]
+
+[project.scripts]
+fcb = "flyvis_circuit_bench.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flyvis_circuit_bench"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "data: needs the measurement package (set FCB_DATA or run `fcb download`); skipped otherwise",
+    "measure: needs the optional [measure] extra (flyvis + torch); skipped otherwise",
+]

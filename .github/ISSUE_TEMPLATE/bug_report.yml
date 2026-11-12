@@ -1,0 +1,29 @@
+name: Bug report
+description: Something does not run, or a number does not reproduce
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Command you ran, what you expected and what you got (full error message if any).
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `uv run fcb --version`
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: Operating system, Python version, and whether the [measure] extra is installed
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: "`uv run fcb verify --data <package directory>` reports OK (for reproduction issues)"

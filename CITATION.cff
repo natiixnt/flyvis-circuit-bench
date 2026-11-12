@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, its measurements or its code, please cite it as below."
+type: software
+title: "flyvis-circuit-bench: a benchmark of circuit-discovery methods against ablation ground truth in the flyvis connectome model"
+abstract: >-
+  In the flyvis model of the fly visual system, each of the 604 cell-type-to-cell-type connection classes is
+  ablated and the change of the network response is the ground truth. Across 10 trained models, ranking
+  connections by synapse count recovers 53% of the achievable signal, the sum of trained weights 76%, a single
+  gradient 92% and attribution patching 97%. The decision rules were written before the data; negative results,
+  including a refuted mechanism hypothesis, are reported. The repository includes a leaderboard and a tool to
+  score new methods.
+authors:
+  - family-names: Szczepanik
+    given-names: Natalia
+version: 1.0.0
+date-released: 2026-11-12
+license: MIT
+repository-code: "https://github.com/natiixnt/flyvis-circuit-bench"
+url: "https://github.com/natiixnt/flyvis-circuit-bench"
+# doi: a Zenodo DOI will be added here with the next release
+keywords:
+  - connectome
+  - interpretability
+  - circuit discovery
+  - attribution patching
+  - flyvis
+  - connectomics
+  - mechanistic interpretability
+  - benchmark
+  - drosophila
+references:
+  - type: article
+    title: "Connectome-constrained networks predict neural activity across the fly visual system"
+    authors:
+      - family-names: Lappalainen
+        given-names: Janne K.
+      - name: "et al."
+    journal: Nature
+    volume: 634
+    start: 1132
+    end: 1140
+    year: 2024
+    doi: 10.1038/s41586-024-07939-3

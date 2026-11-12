@@ -1,0 +1,327 @@
+{
+ "seed": 20261101,
+ "flyvis": "1.2.0",
+ "n": 40,
+ "n_krawedzi": 24,
+ "n_sintel": 16,
+ "katy": [
+  15,
+  45,
+  75,
+  105,
+  135,
+  165,
+  195,
+  225,
+  255,
+  285,
+  315,
+  345
+ ],
+ "bodzce": [
+  {
+   "id": "krawedz_k015_j0_v19",
+   "typ": "krawedz",
+   "kat": 15,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k015_j1_v19",
+   "typ": "krawedz",
+   "kat": 15,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k045_j0_v19",
+   "typ": "krawedz",
+   "kat": 45,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k045_j1_v19",
+   "typ": "krawedz",
+   "kat": 45,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k075_j0_v19",
+   "typ": "krawedz",
+   "kat": 75,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k075_j1_v19",
+   "typ": "krawedz",
+   "kat": 75,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k105_j0_v19",
+   "typ": "krawedz",
+   "kat": 105,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k105_j1_v19",
+   "typ": "krawedz",
+   "kat": 105,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k135_j0_v19",
+   "typ": "krawedz",
+   "kat": 135,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k135_j1_v19",
+   "typ": "krawedz",
+   "kat": 135,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k165_j0_v19",
+   "typ": "krawedz",
+   "kat": 165,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k165_j1_v19",
+   "typ": "krawedz",
+   "kat": 165,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k195_j0_v19",
+   "typ": "krawedz",
+   "kat": 195,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k195_j1_v19",
+   "typ": "krawedz",
+   "kat": 195,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k225_j0_v19",
+   "typ": "krawedz",
+   "kat": 225,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k225_j1_v19",
+   "typ": "krawedz",
+   "kat": 225,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k255_j0_v19",
+   "typ": "krawedz",
+   "kat": 255,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k255_j1_v19",
+   "typ": "krawedz",
+   "kat": 255,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k285_j0_v19",
+   "typ": "krawedz",
+   "kat": 285,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k285_j1_v19",
+   "typ": "krawedz",
+   "kat": 285,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k315_j0_v19",
+   "typ": "krawedz",
+   "kat": 315,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k315_j1_v19",
+   "typ": "krawedz",
+   "kat": 315,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k345_j0_v19",
+   "typ": "krawedz",
+   "kat": 345,
+   "jasnosc": 0,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "krawedz_k345_j1_v19",
+   "typ": "krawedz",
+   "kat": 345,
+   "jasnosc": 1,
+   "predkosc": 19,
+   "n_klatek": 121
+  },
+  {
+   "id": "sintel_alley_2_p0",
+   "typ": "sintel",
+   "sekwencja": "alley_2",
+   "podzial": 0,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_alley_2_p2",
+   "typ": "sintel",
+   "sekwencja": "alley_2",
+   "podzial": 2,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_ambush_5_p0",
+   "typ": "sintel",
+   "sekwencja": "ambush_5",
+   "podzial": 0,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_ambush_5_p1",
+   "typ": "sintel",
+   "sekwencja": "ambush_5",
+   "podzial": 1,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_ambush_5_p2",
+   "typ": "sintel",
+   "sekwencja": "ambush_5",
+   "podzial": 2,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_ambush_6_p1",
+   "typ": "sintel",
+   "sekwencja": "ambush_6",
+   "podzial": 1,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_ambush_6_p2",
+   "typ": "sintel",
+   "sekwencja": "ambush_6",
+   "podzial": 2,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_bamboo_1_p0",
+   "typ": "sintel",
+   "sekwencja": "bamboo_1",
+   "podzial": 0,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_bamboo_1_p1",
+   "typ": "sintel",
+   "sekwencja": "bamboo_1",
+   "podzial": 1,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_bamboo_1_p2",
+   "typ": "sintel",
+   "sekwencja": "bamboo_1",
+   "podzial": 2,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_cave_4_p1",
+   "typ": "sintel",
+   "sekwencja": "cave_4",
+   "podzial": 1,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_market_2_p0",
+   "typ": "sintel",
+   "sekwencja": "market_2",
+   "podzial": 0,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_market_2_p1",
+   "typ": "sintel",
+   "sekwencja": "market_2",
+   "podzial": 1,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_mountain_1_p1",
+   "typ": "sintel",
+   "sekwencja": "mountain_1",
+   "podzial": 1,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_shaman_2_p0",
+   "typ": "sintel",
+   "sekwencja": "shaman_2",
+   "podzial": 0,
+   "n_klatek": 40
+  },
+  {
+   "id": "sintel_shaman_3_p0",
+   "typ": "sintel",
+   "sekwencja": "shaman_3",
+   "podzial": 0,
+   "n_klatek": 40
+  }
+ ]
+}
