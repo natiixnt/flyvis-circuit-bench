@@ -5,7 +5,7 @@ of circuit-discovery methods against exact ablation ground truth in a connectome
 visual system.</b></p>
 
 <p align="center">
-  <a href="../../actions/workflows/ci.yml"><img alt="CI: GitHub Actions" src="https://img.shields.io/badge/CI-GitHub%20Actions-lightgrey"></a>
+  <a href="../../actions/workflows/ci.yml"><img alt="CI: GitHub Actions" src="https://github.com/natiixnt/flyvis-circuit-bench/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="Code: MIT" src="https://img.shields.io/badge/code-MIT-blue"></a>
   <a href="LICENSE-data"><img alt="Data: CC BY 4.0" src="https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey"></a>
   <img alt="Python 3.11 to 3.13" src="https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue">

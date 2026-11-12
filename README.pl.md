@@ -5,7 +5,7 @@ Benchmark metod odkrywania obwodów względem dokładnej prawdy z ablacji w mode
 ograniczonym konektomem.</b></p>
 
 <p align="center">
-  <a href="../../actions/workflows/ci.yml"><img alt="CI: GitHub Actions" src="https://img.shields.io/badge/CI-GitHub%20Actions-lightgrey"></a>
+  <a href="../../actions/workflows/ci.yml"><img alt="CI: GitHub Actions" src="https://github.com/natiixnt/flyvis-circuit-bench/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="Kod: MIT" src="https://img.shields.io/badge/code-MIT-blue"></a>
   <a href="LICENSE-data"><img alt="Dane: CC BY 4.0" src="https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey"></a>
   <img alt="Python od 3.11 do 3.13" src="https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue">
