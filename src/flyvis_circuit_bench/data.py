@@ -38,6 +38,19 @@ def required_files() -> list[str]:
     return sorted(out)
 
 
+def v11_files() -> list[str]:
+    """Files added in package v1.1.0 (Z4 task effect, Z6 silencing); v1.0.0 does not have them."""
+    return sorted([f"task/C1_{m}.npz" for m in MODELS_POOLED] + [f"silence/C1_{m}.npz" for m in MODELS_POOLED])
+
+
+def package_version(data_dir: Path) -> str | None:
+    """Version in MANIFEST.json of the package directory (None when there is no readable manifest)."""
+    try:
+        return str(json.loads((Path(data_dir) / "MANIFEST.json").read_text(encoding="utf-8"))["version"])
+    except (OSError, ValueError, KeyError):
+        return None
+
+
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -74,6 +87,12 @@ def verify(data_dir: Path) -> list[str]:
             problems.append(f"not listed in {CHECKSUMS}: {rel}")
         elif sha256_file(p) != sums[rel]:
             problems.append(f"checksum mismatch: {rel}")
+    for rel in sorted(set(sums) - set(required_files())):  # files of v1.1.0 (task/, silence/): all or none
+        p = data_dir / rel
+        if not p.is_file():
+            problems.append(f"missing: {rel}")
+        elif sha256_file(p) != sums[rel]:
+            problems.append(f"checksum mismatch: {rel}")
     return problems
 
 
@@ -97,6 +116,8 @@ def load(data_dir: Path) -> dict:
         "M13": "cheap_methods/C1_{m}.npz",
         "M5": "activity_sae/C1_{m}.npz",
         "F2": "f2/C1_{m}.npz",
+        "SIL": "silence/C1_{m}.npz",  # v1.1 Z6, optional (fcb measure --what silence)
+        "T": "task/C1_{m}.npz",  # v1.1 Z4, optional (fcb measure --what task)
     }
     models: dict[str, dict] = {}
     for m in MODELS_POOLED:

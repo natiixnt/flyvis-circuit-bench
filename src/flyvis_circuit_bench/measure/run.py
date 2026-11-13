@@ -1,7 +1,7 @@
 """Re-measure one model: every method of the leaderboard and the ablation truth, file by file of the package.
 
     uv sync --extra measure
-    uv run fcb measure --what all --condition trained --model 000 --stimuli data/measurements-v1.0.0/stimuli_B.json
+    uv run fcb measure --what all --condition trained --model 000 --stimuli data/measurements-v1.1.0/stimuli_B.json
 
 Steps (`--what`), each writing the file of the measurement package with the same keys, so `fcb reproduce` and the
 tests can use it:
@@ -11,6 +11,10 @@ tests can use it:
     cheap      cheap_methods/C1_<model>.npz  gradient (40 backward passes) and |weights| x neuron activity (B'); minutes
     sae        activity_sae/C1_<model>.npz   |weights| x source activity and SAE code (B', SAE in numpy); minutes
     structure  structure.npz                 class size (connectome only); seconds
+    silence    silence/C1_<model>.npz        v1.1 Z6: effect of silencing a whole source cell type (63 types), minutes;
+                                             not in `all`
+    task       task/C1_<model>.npz           v1.1 Z4: effect of every ablation on the decoded optic flow (loss and
+                                             change), needs the Sintel ground truth flow (`--flow-dir`); not in `all`
 
 `cheap` and `sae` exist for trained networks only, as in the study. The second stimulus set (F2) has no
 measurement step in v1.0.0 (its outputs are in the package).
@@ -197,9 +201,28 @@ def torch_cpu() -> None:
 
 
 def measure(what: str, condition: str, model: str, stimuli: Path, out: Path, device: str = "cpu", k: int = 32,
-            sintel_dir: Path | None = None) -> list[Path]:
+            sintel_dir: Path | None = None, flow_dir: Path | None = None, classes: list[int] | None = None,
+            store_flow: str = "float16", types: list[str] | None = None) -> list[Path]:
     """One step of `STEPS` or "all" (for the untrained network: ablation and structure); `cheap` and `sae` only for
     the trained network."""
+    if types is not None and what != "silence":
+        raise ValueError("--types applies to the silence step only")
+    if classes is not None and what != "task":
+        raise ValueError("--classes applies to the task step only")
+    if what == "silence":  # v1.1 Z6, trained network only, not part of "all"
+        if condition != "C1":
+            raise ValueError("the silence step exists for trained networks only")
+        from . import silence
+
+        return [silence.measure_silence(model, stimuli, out, device, sintel_dir, types)]
+    if what == "task":  # v1.1 Z4, trained network only, not part of "all" (needs the Sintel ground truth flow)
+        if condition != "C1":
+            raise ValueError("the task step exists for trained networks only")
+        if flow_dir is None:
+            raise ValueError("the task step needs --flow-dir (MPI Sintel training/flow)")
+        from . import task
+
+        return [task.measure_task(model, stimuli, out, flow_dir, device, sintel_dir, classes, store_flow)]
     if what == "all":
         steps = STEPS if condition == "C1" else ("ablation", "structure")
     else:

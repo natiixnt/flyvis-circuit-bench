@@ -18,7 +18,7 @@ def _archive(package, path):
 
 def test_release_url_uses_owner_and_rejects_bad_names():
     url = DL.release_url("someone", DL.ASSET)
-    assert url == f"https://github.com/someone/flyvis-circuit-bench/releases/download/v1.0.0/{DL.ASSET}"
+    assert url == f"https://github.com/someone/flyvis-circuit-bench/releases/download/v1.1.0/{DL.ASSET}"
     for bad in ("", "a/b", " x"):
         with pytest.raises(ValueError):
             DL.release_url(bad, DL.ASSET)
@@ -72,13 +72,34 @@ def test_safe_extract_rejects_links(tmp_path):
 
 def test_cli_download_owner_defaults_to_the_release_account(monkeypatch, tmp_path):
     calls = []
-    monkeypatch.setattr(DL, "download", lambda owner, dest, repo, tag: calls.append(owner) or tmp_path)
+    monkeypatch.setattr(DL, "download",
+                        lambda owner, dest, repo, tag, version: calls.append((owner, version)) or tmp_path)
     monkeypatch.delenv("FCB_OWNER", raising=False)
     assert main(["download", "--dest", str(tmp_path)]) == 0
     monkeypatch.setenv("FCB_OWNER", "someone-else")
     assert main(["download", "--dest", str(tmp_path)]) == 0
     assert main(["download", "--owner", "third", "--dest", str(tmp_path)]) == 0
-    assert calls == ["natiixnt", "someone-else", "third"]
+    assert calls == [("natiixnt", "1.1.0"), ("someone-else", "1.1.0"), ("third", "1.1.0")]
+    assert main(["download", "--version", "1.0.0", "--dest", str(tmp_path)]) == 0
+    assert calls[-1] == ("someone-else", "1.0.0")
+
+
+def test_default_package_is_1_1_0_and_1_0_0_stays_available():
+    assert DL.DATA_VERSION == "1.1.0" and DL.asset_name() == "measurements-v1.1.0.tar.gz"
+    assert DL.asset_name("1.0.0") == "measurements-v1.0.0.tar.gz"
+    with pytest.raises(ValueError, match="unknown data version"):
+        DL.asset_name("2.0.0")
+
+
+def test_download_builds_urls_for_the_requested_version(monkeypatch, tmp_path):
+    urls = []
+    monkeypatch.setattr(DL, "_fetch", lambda url, dest, timeout=60.0: urls.append(url) or dest.write_text(""))
+    monkeypatch.setattr(DL, "install", lambda *a, **k: tmp_path)
+    DL.download("someone", tmp_path, version="1.0.0")
+    DL.download("someone", tmp_path)
+    base = "https://github.com/someone/flyvis-circuit-bench/releases/download"
+    assert urls == [f"{base}/v1.0.0/SHA256SUMS", f"{base}/v1.0.0/measurements-v1.0.0.tar.gz",
+                    f"{base}/v1.1.0/SHA256SUMS", f"{base}/v1.1.0/measurements-v1.1.0.tar.gz"]
 
 
 def test_cli_download_from_local_archive(package, tmp_path, capsys):

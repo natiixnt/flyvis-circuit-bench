@@ -56,6 +56,10 @@ Wszystkie cztery decyzje spisane przed replikacją utrzymały się na 5 modelach
 drugim zestawie bodźców. Masz metodę, która szereguje połączenia? [Oceń ją](#dodaj-swoją-metodę) w kilka minut,
 bez GPU, jeśli korzysta z konektomu i wag; metody oparte na aktywacjach i gradientach potrzebują flyvis i torch.
 
+Między modelami efekt jednej klasy połączeń bardzo się zmienia: mediana korelacji Spearmana efektu między dwoma
+modelami wynosi 0.33 (v1.1, [docs/v1.1/z3.md](docs/v1.1/z3.md)), więc wnioski dotyczą zespołu modeli, a nie
+efektu danej klasy w pojedynczym modelu.
+
 ## Dlaczego to ważne
 
 - **Konektomy już są; które połączenia są ważne, wciąż nie wiadomo.** Istnieją pełne konektomy muchy. Ten
@@ -118,14 +122,39 @@ Anatomia przewiduje sieci niewytrenowane lepiej niż wytrenowane (AUROC liczby s
 flyvis ustawia na starcie siłę każdej klasy z konektomu (suma wag = 0.01 x liczba krawędzi), więc przed treningiem
 każda waga jest stałą funkcją anatomii; trening odsuwa siły od niej.
 
+## v1.1: analizy eksploracyjne †
+
+Dodane po badaniu, zdefiniowane w [docs/analysis-plan-v1.1.md](docs/analysis-plan-v1.1.md) przed uruchomieniem,
+oznaczone †; żadna nie zmienia zapisanej decyzji. `fcb reproduce` liczy je od nowa z paczki 1.1.0.
+
+- **Próg ([Z1](docs/v1.1/z1.md)).** Przesunięcie progu z górnych 31 na górne 121 klas nie zmienia kolejności żadnej
+  pary metod (0 zamian wśród 45 par); liczba synaps zostaje między AUROC 0.745 a 0.763, patching między 0.982 a
+  0.994.
+- **Rodziny bodźców ([Z2](docs/v1.1/z2.md)).** Prawda z 24 przesuwanych krawędzi i prawda z 16 klipów Sintel
+  zgadzają się (Spearman 0.991); patching ma AUROC 0.986 na krawędziach i 0.987 na klipach, liczba synaps 0.758 i
+  0.761.
+- **Zgodność między modelami ([Z3](docs/v1.1/z3.md)).** Efekt klasy różni się między modelami: mediana Spearmana
+  0.33 między dwoma modelami (1.00 między połówkami bodźców w jednym modelu) i tylko 3 klasy są w górnych 61 co
+  najmniej 9 z 10 modeli. Efekt zmierzony w innym modelu przewiduje górne 61 modelu z AUROC 0.727, poniżej liczby
+  synaps (0.763), a lepiej od niej w 32 z 90 par modeli.
+- **Prawda zadaniowa ([Z4](docs/v1.1/z4.md)).** Efekt ablacji i zmiana straty przepływu optycznego na 16 klipach
+  Sintel zgadzają się ze Spearmanem 0.667; z 61 najważniejszych klas wg efektu ablacji 27 jest też w górnych 61 wg
+  efektu zadaniowego, a 34 nie.
+- **Wyciszanie całego typu ([Z6](docs/v1.1/z6.md)).** Wyciszenie naraz wszystkich klas wychodzących z jednego z 63
+  typów źródłowych daje efekt o Spearmanie 0.976 z sumą efektów jego klas; 12 typów maskuje, a 7 działa odwrotnie.
+  W 12 z 630 par typ x model wyciszenie rozbija dynamikę sieci, więc te wnioski opieramy na rangach.
+- **Ablacja do średniej ([wynik repozytorium badawczego](docs/v1.1/mean-ablation.md)).** Zastąpienie prądu klasy
+  jego średnią zamiast zerem zachowuje kolejność metod: patching 0.974 (0.987 dla zerowania), liczba synaps 0.777
+  (0.763). Tego wyniku `fcb reproduce` nie liczy od nowa, pomiarów nie ma w paczce.
+
 ## Szybki start
 
 Same wyniki, bez GPU, około minuty na laptopie (potrzebny [uv](https://docs.astral.sh/uv/)):
 
 ```bash
 git clone https://github.com/natiixnt/flyvis-circuit-bench && cd flyvis-circuit-bench
-uv run fcb download                      # paczka pomiarów 38.5 MB, sprawdzana sha256
-uv run fcb reproduce --data data/measurements-v1.0.0 --check
+uv run fcb download                      # paczka pomiarów 1.1.0, 40.3 MB, sprawdzana sha256
+uv run fcb reproduce --data data/measurements-v1.1.0 --check
 ```
 
 `reproduce` przelicza każdą tabelę w [docs/results.md](docs/results.md) i
@@ -143,7 +172,7 @@ Po szybkim starcie:
 import numpy as np
 from flyvis_circuit_bench import score
 
-DATA = "data/measurements-v1.0.0"
+DATA = "data/measurements-v1.1.0"
 inputs = score.method_inputs(DATA)  # dla modelu: typy komórek, liczby synaps, wagi, krawędzie; bez prawdy
 
 def my_method(x):  # jeden wynik na klasę połączeń
@@ -153,7 +182,7 @@ np.savez("my_method.npz", **{model: my_method(x) for model, x in inputs.items()}
 ```
 
 ```bash
-uv run fcb score --data data/measurements-v1.0.0 --scores my_method.npz --name "mean |weight| per edge"
+uv run fcb score --data data/measurements-v1.1.0 --scores my_method.npz --name "mean |weight| per edge"
 # scores 0.827 AUROC
 ```
 
@@ -209,7 +238,7 @@ nie wyznacza dynamiki: [docs/related_work.md](docs/related_work.md).
 - **Odtworzenie bajt w bajt.** `fcb reproduce --check` przelicza `results/results.json` i `docs/results.md` i
   porównuje je bajt w bajt; CI sprawdza tę ścieżkę kodu na danych syntetycznych przy każdym pushu.
 - **Sumy kontrolne.** Asset wydania ma `SHA256SUMS`; `fcb download` sprawdza archiwum i każdy plik w środku
-  (sha256 archiwum `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). Pliki pomiarów są
+  (sha256 archiwum 1.1.0 `sha256:f21ee4573834dbfad4517da00da200c590df9f544a0d26df8d26b24f48db2bb3`, archiwum 1.0.0 `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). Pliki pomiarów są
   bajtowo identyczne z tymi, z których policzono tabele badania.
 - **Determinizm.** Stałe ziarna (bootstrap 20261101, losowe kierunki dla każdego bodźca), posortowana kolejność
   modeli, wykresy bez znaczników czasu. Użyliśmy dwóch urządzeń (Apple silicon dla modeli 000-004, CUDA dla
@@ -224,7 +253,14 @@ nie wyznacza dynamiki: [docs/related_work.md](docs/related_work.md).
   po treningu na większą o 0.091 tylko dlatego, że patching dochodzi do sufitu w sieciach niewytrenowanych.
 - **Jedyną prawdą jest zerowanie.** Patching to linearyzacja wyzerowania klasy, więc część jego 0.987 może brać
   się z dopasowania do interwencji, a nie z trafiania w to, co ważne; to benchmark metod względem ablacji, nie
-  dowód „funkcji poza schematem połączeń”. Test odporności z ablacją do średniej planujemy jako osobne badanie.
+  dowód „funkcji poza schematem połączeń”. Z ablacją do średniej zamiast zerowania kolejność metod się utrzymuje ([v1.1](docs/v1.1/mean-ablation.md)); inne
+  interwencje nie były sprawdzane.
+- **Efekt zmienia się między modelami.** Mediana Spearmana efektu między dwoma modelami to 0.33, a tylko 3 klasy są w
+  górnych 61 co najmniej 9 modeli. Rankingi metod trzymają się na średniej z zespołu; efekt jednej klasy w jednym
+  modelu nie jest stabilną wielkością ([Z3](docs/v1.1/z3.md)).
+- **Wyciszenie całego typu może rozbić dynamikę.** W 12 z 630 par typ x model efekt jest ponad 1000 razy większy od
+  mediany ([Z6](docs/v1.1/z6.md)); wnioski opieramy na rangach.
+- **Prawda zadaniowa jest mała.** 16 klipów Sintel, jeden dekoder na model ([Z4](docs/v1.1/z4.md)).
 - **Tanie przybliżenia nie są za darmo.** Gradient (jedno przejście wstecz) traci do patchingu 0.026 AUROC
   [-0.033, -0.019], 10 modeli. Ten SAE (0.873) nie bije zwykłej sumy |wag| (0.878); to jedna konfiguracja, nie
   rzadkie autoenkodery w ogóle.
@@ -241,8 +277,8 @@ nie wyznacza dynamiki: [docs/related_work.md](docs/related_work.md).
 - **Druga rodzina modeli.** Jeden wytrenowany zespół to najsłabszy punkt v1.0.0. Następny krok: model z
   neuronami typu leaky integrate-and-fire zbudowany z całego konektomu FlyWire (Shiu i in., Nature 2024), z tą
   samą prawdą z ablacji i tym samym rankingiem.
-- **Odporność na rodzaj interwencji:** prawda policzona od nowa z ablacją do średniej zamiast zerowania i
-  ponowna ocena każdej metody (osobne badanie, wyniki w v1.1).
+- **Ablacja do średniej w paczce:** pomiary ablacji do średniej i ich krok w `fcb measure` (dziś wynik z v1.1
+  pochodzi z repozytorium badawczego i nie jest tu liczony od nowa).
 - **Zewnętrzny znacznik czasu** dla reguł następnego badania (OSF), zanim powstaną dane, i DOI z Zenodo dla
   wydania.
 - **Kod pomiaru drugiego zestawu bodźców** (przesuwane paski). v1.0.0 zawiera kod pomiaru prawdy i każdej metody

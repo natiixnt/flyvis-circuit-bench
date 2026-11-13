@@ -54,6 +54,10 @@ All four decisions written down before the replication held on 5 models analysed
 second stimulus set. Have a method that ranks connections? [Score it](#add-your-method) in a few minutes,
 without a GPU, for connectome and weight based methods; activation and gradient methods need flyvis and torch.
 
+Between models the effect of one connection class varies: the median Spearman correlation of the effect between
+two models is 0.33 (v1.1, [docs/v1.1/z3.md](docs/v1.1/z3.md)), so the conclusions are about the ensemble, not
+about the per-class effect in a single model.
+
 ## Why it matters
 
 - **Connectomes are here; which connections matter is still open.** Whole-brain wiring diagrams of the fly now
@@ -116,14 +120,40 @@ Anatomy predicts the untrained networks better than the trained ones (AUROC of s
 0.763) because flyvis initializes every class strength from the connectome (weight sum = 0.01 x number of edges),
 so before training each weight is a fixed function of the anatomy; training moves the strengths away from it.
 
+## v1.1: exploratory analyses †
+
+Added after the study, defined in [docs/analysis-plan-v1.1.md](docs/analysis-plan-v1.1.md) before they were run,
+marked †; none changes a preregistered decision. `fcb reproduce` recomputes them from package 1.1.0.
+
+- **Threshold ([Z1](docs/v1.1/z1.md)).** Moving the cut from the top 31 to the top 121 classes reorders no pair of
+  methods (0 swaps among 45 pairs); synapse count stays between AUROC 0.745 and 0.763, patching between 0.982 and
+  0.994.
+- **Stimulus families ([Z2](docs/v1.1/z2.md)).** The truth from the 24 moving edges and the truth from the 16 Sintel
+  clips agree (Spearman 0.991); patching reaches AUROC 0.986 on the edges and 0.987 on the clips, synapse count 0.758
+  and 0.761.
+- **Agreement between models ([Z3](docs/v1.1/z3.md)).** The effect of a class differs between models: median
+  Spearman 0.33 between two models (1.00 between halves of the stimuli inside one model) and only 3 classes are in
+  the top 61 of at least 9 of the 10 models. The effect measured in another model predicts the top 61 of a model with
+  AUROC 0.727, below synapse count (0.763), and better than it in 32 of 90 model pairs.
+- **Task truth ([Z4](docs/v1.1/z4.md)).** The ablation effect and the change of the optic-flow loss on the 16 Sintel
+  clips agree at Spearman 0.667; of the 61 most important classes by ablation effect, 27 are also in the top 61 by
+  task effect and 34 are not.
+- **Silencing a whole type ([Z6](docs/v1.1/z6.md)).** Silencing all classes that leave one of the 63 source types at
+  once has an effect with Spearman 0.976 to the sum of the effects of its classes; 12 types are masking and 7 are
+  reverse. In 12 of 630 type x model pairs silencing breaks the dynamics of the network, so these conclusions rest on
+  ranks.
+- **Mean ablation ([result of the research repository](docs/v1.1/mean-ablation.md)).** Replacing the current of a
+  class by its mean instead of zero keeps the order of the methods: patching 0.974 (0.987 for zeroing), synapse
+  count 0.777 (0.763). This one is not recomputed by `fcb reproduce`, the measurements are not in the package.
+
 ## Quickstart
 
 Results only, no GPU, about a minute on a laptop (needs [uv](https://docs.astral.sh/uv/)):
 
 ```bash
 git clone https://github.com/natiixnt/flyvis-circuit-bench && cd flyvis-circuit-bench
-uv run fcb download                      # 38.5 MB measurement package, sha256-verified
-uv run fcb reproduce --data data/measurements-v1.0.0 --check
+uv run fcb download                      # 40.3 MB measurement package 1.1.0, sha256-verified
+uv run fcb reproduce --data data/measurements-v1.1.0 --check
 ```
 
 `reproduce` recomputes every table in [docs/results.md](docs/results.md) and
@@ -141,7 +171,7 @@ looking at the ablations. After the Quickstart:
 import numpy as np
 from flyvis_circuit_bench import score
 
-DATA = "data/measurements-v1.0.0"
+DATA = "data/measurements-v1.1.0"
 inputs = score.method_inputs(DATA)  # per model: cell types, synapse counts, weights, edges; no truth
 
 def my_method(x):  # one score per connection class
@@ -151,7 +181,7 @@ np.savez("my_method.npz", **{model: my_method(x) for model, x in inputs.items()}
 ```
 
 ```bash
-uv run fcb score --data data/measurements-v1.0.0 --scores my_method.npz --name "mean |weight| per edge"
+uv run fcb score --data data/measurements-v1.1.0 --scores my_method.npz --name "mean |weight| per edge"
 # scores 0.827 AUROC
 ```
 
@@ -206,7 +236,7 @@ pin down the dynamics: [docs/related_work.md](docs/related_work.md).
 - **Byte-identical reproduction.** `fcb reproduce --check` recomputes `results/results.json` and
   `docs/results.md` and compares them byte for byte; CI checks the code path on synthetic data on every push.
 - **Checksums.** The release asset ships with `SHA256SUMS`; `fcb download` verifies the archive and every file
-  inside it (sha256 of the archive `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). The
+  inside it (sha256 of the archive 1.1.0 `sha256:f21ee4573834dbfad4517da00da200c590df9f544a0d26df8d26b24f48db2bb3`; of the archive 1.0.0 `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). The
   measurement files are byte-identical to the ones the study tables were computed from.
 - **Determinism.** Fixed seeds (bootstrap 20261101, random directions per stimulus), sorted model order,
   figures without timestamps. Two devices were used (Apple silicon for models 000-004, CUDA for 005-009 and the
@@ -221,8 +251,14 @@ pin down the dynamics: [docs/related_work.md](docs/related_work.md).
   0.091 larger after training only because patching hits the ceiling in untrained networks.
 - **Zero ablation is the only truth.** Patching is a linearization of zeroing a class, so part of its 0.987 may
   come from matching the intervention rather than from finding what matters; it is a benchmark of methods
-  against ablation, not evidence of "function beyond the wiring diagram". A robustness test with mean ablation
-  is planned as a separate study.
+  against ablation, not evidence of "function beyond the wiring diagram". With mean ablation instead of zeroing the
+  order of the methods holds ([v1.1](docs/v1.1/mean-ablation.md)); other interventions are untested.
+- **The effect varies between models.** The median Spearman of the effect between two models is 0.33, and only 3
+  classes are in the top 61 of at least 9 models. Rankings of methods hold on the ensemble average; the effect of a
+  single class in a single model is not a stable quantity ([Z3](docs/v1.1/z3.md)).
+- **Silencing a whole type can break the dynamics.** In 12 of 630 type x model pairs the effect is more than 1000
+  times the median ([Z6](docs/v1.1/z6.md)); conclusions rest on ranks.
+- **The task truth is small.** 16 Sintel clips, one decoder per model ([Z4](docs/v1.1/z4.md)).
 - **No free lunch from cheap proxies.** The gradient (one backward pass) loses 0.026 AUROC to patching
   [-0.033, -0.019], 10 models. This SAE (0.873) does not beat the plain sum of |weights| (0.878); it is one
   configuration, not sparse autoencoders in general.
@@ -239,8 +275,8 @@ pin down the dynamics: [docs/related_work.md](docs/related_work.md).
 - **A second model family.** One trained ensemble is the weakest point of v1.0.0. Next: a whole-brain leaky
   integrate-and-fire model of the fly built from the FlyWire connectome (Shiu et al., Nature 2024), with the same
   ablation truth and the same leaderboard.
-- **Robustness to the intervention:** the truth recomputed with mean ablation instead of zeroing, every method
-  scored again (separate study, results in v1.1).
+- **Mean ablation in the package:** the mean-ablation measurements and their `fcb measure` step (today the result
+  of v1.1 comes from the research repository and is not recomputed here).
 - **External time stamp** for the rules of the next study (OSF) before its data exist, and a Zenodo DOI for the
   release.
 - **Measurement code for the second stimulus set** (moving bars). v1.0.0 ships measurement code for the truth and

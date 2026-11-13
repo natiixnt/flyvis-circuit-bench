@@ -8,7 +8,7 @@ This page describes what is measured and how. The rules for decisions are in
 [flyvis](https://github.com/TuragaLab/flyvis) 1.2.0 (Lappalainen et al., Nature 2024): a recurrent network of
 the fly visual system whose architecture is fixed by the connectome (65 cell types, retinotopic hexagonal
 columns) and whose parameters were trained on optic flow. We use the released ensemble `flow/0000`, models
-000-009 (the first ten by identifier, chosen before any result), with the `best` checkpoint. Models 000-004 are
+000-009 (the first ten by identifier, chosen before any result; flyvis orders the identifiers 000-049 by task error, so these are the ten best of 50), with the `best` checkpoint. Models 000-004 are
 the **discovery** models (analysed first, they shaped the follow-up questions), models 005-009 the
 **replication** models (analysed only after the replication rules were written down).
 
@@ -163,7 +163,7 @@ The measurement path is optional and heavy:
 ```bash
 uv sync --extra measure                    # flyvis 1.2.0 + torch
 export FLYVIS_ROOT_DIR=$PWD/flyvis_data    # flyvis downloads the ensemble here; put MPI Sintel in ./sintel
-uv run fcb measure --what all --condition trained --model 000 --stimuli data/measurements-v1.0.0/stimuli_B.json
+uv run fcb measure --what all --condition trained --model 000 --stimuli data/measurements-v1.1.0/stimuli_B.json
 ```
 
 `fcb measure` writes the files of the measurement package with the same keys, one step at a time (`--what`):

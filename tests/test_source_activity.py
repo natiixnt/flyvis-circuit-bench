@@ -1,10 +1,10 @@
 """The two methods without learned weights (source activity only, synapse count x source activity) and the names."""
 
-import os
 from pathlib import Path
 
 import numpy as np
 import pytest
+import studydata as study_data
 
 from flyvis_circuit_bench import analysis as A
 from flyvis_circuit_bench import data as D
@@ -12,7 +12,7 @@ from flyvis_circuit_bench import names as N
 from flyvis_circuit_bench.source_activity import TYPE_INDEX, source_activity, synapses_x_activity
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = Path(os.environ.get("FCB_DATA", ROOT / "data" / "measurements-v1.0.0"))
+DATA = study_data.DATA
 
 
 def test_source_activity_is_the_activity_of_the_source_type():

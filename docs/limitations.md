@@ -35,7 +35,7 @@ Reported with the same weight as the main result. Numbers come from [results.md]
 - **Zero ablation is the only truth.** The truth sets a class to zero, and patching is a linearization of that
   same zeroing, so part of its AUROC of 0.987 may come from matching the intervention rather than from finding
   what the network relies on. With other interventions (mean ablation, counterfactual inputs) effect sizes can
-  change; a robustness test with mean ablation is planned as a separate study (results in v1.1).
+  change; with mean ablation instead of zeroing the order of the methods holds (v1.1, [mean-ablation.md](v1.1/mean-ablation.md), computed in the research repository and not recomputed by `fcb reproduce`); other interventions are untested.
 - **Patching and the truth measure the same thing.** Patching is a first-order estimator of the ablation effect,
   so a high score shows that linearization works in this model. It does not show that patching finds a
   "mechanism", and the benchmark says nothing about function beyond the wiring diagram.
@@ -46,8 +46,21 @@ Reported with the same weight as the main result. Numbers come from [results.md]
   truth is reliable on these stimuli (ceiling 1.000), which is not the same as complete coverage of the visual
   world.
 - **One model family.** One architecture and one trained ensemble (`flow/0000`), 10 of its models. Results for
-  other connectomes, tasks or training regimes are untested; a second model is the top item of the
+  other connectomes, tasks or training regimes are untested. Models 000-009 are not a random sample of the 50
+  released models: the flyvis documentation states that the model numbers of the pretrained ensemble are
+  sorted by task error (0-49, best to worst), so these are the ten best by that ranking and may be better
+  trained than a typical model. A second model is the top item of the
   [roadmap](../README.md#roadmap). The conclusions are about this model, not about the fly.
+- **The effect of a class varies between models (Z3 †).** The median Spearman correlation of the effect between two
+  models is 0.33, and only 3 classes are in the top 61 of at least 9 of the 10 models. The rankings of methods hold on
+  the ensemble, because the effects are averaged over models; the effect of one class in one model is not a stable
+  quantity, and the conclusions are about the ensemble ([z3.md](v1.1/z3.md)).
+- **Neuronal and task truth agree only partly (Z4 †).** The ablation effect and the change of the optic-flow loss
+  agree at Spearman 0.667; 34 of the 61 most important classes by ablation effect are not in the top 61 by task
+  effect. The task truth rests on 16 Sintel clips and one decoder per model ([z4.md](v1.1/z4.md)).
+- **Silencing a type can break the dynamics (Z6 †).** In 12 of 630 type x model pairs the effect of silencing all
+  classes of a type is more than 1000 times the median effect of its model, so those conclusions rest on Spearman
+  correlations and ranks, not on the size of the effects ([z6.md](v1.1/z6.md)).
 - **Small N.** With 5 models the bootstrap alone undercovers (0.84 instead of 0.95), hence the rule that both
   intervals must agree, and Holm correction for the four confirmatory replication tests. Minimal detectable
   effects are about 0.12 AUROC with 5 models and 0.07 with 10.

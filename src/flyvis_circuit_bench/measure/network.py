@@ -85,6 +85,23 @@ def prepare_flyvis(device: str | None = None):
     return flyvis
 
 
+VRAM_LIMIT_MIB = 3300  # hard cap per process (as in #103)
+VRAM_FREE_MIB = 3584  # free memory required before the start
+
+
+def limit_vram(device: str, limit_mib: int = VRAM_LIMIT_MIB, need_free_mib: int = VRAM_FREE_MIB) -> None:
+    """On a CUDA device: refuse to start with less than `need_free_mib` free (nvidia-smi under WSL understates
+    use, so `mem_get_info`) and cap this process at `limit_mib`. Nothing on the CPU."""
+    if not str(device).startswith("cuda"):
+        return
+    import torch
+
+    free, total = torch.cuda.mem_get_info()
+    if free / 2**20 < need_free_mib:
+        raise RuntimeError(f"only {free / 2**20:.0f} MiB of GPU memory free, {need_free_mib} MiB needed")
+    torch.cuda.set_per_process_memory_fraction(min(1.0, limit_mib * 2**20 / total))
+
+
 @contextmanager
 def default_device(device: str):
     """flyvis creates some tensors on the default torch device, so we switch it for the block."""
@@ -127,6 +144,15 @@ def load_trained(model: str, device: str = "cpu"):
 
     net = NetworkView(flyvis.results_dir / ENSEMBLE / model).init_network(checkpoint="best")
     return _no_grad(net, device)
+
+
+def load_trained_on_flyvis_device(model: str, device: str = "cpu"):
+    """Same network as `load_trained`, created while flyvis' own default device is still set (its parameter
+    sampling fails on a CUDA machine when the default device was switched to the CPU first), then moved."""
+    flyvis = prepare_flyvis()
+    from flyvis.network import NetworkView
+
+    return _no_grad(NetworkView(flyvis.results_dir / ENSEMBLE / model).init_network(checkpoint="best"), device)
 
 
 def load_initial(model: str, seed: int | None = None, device: str = "cpu"):

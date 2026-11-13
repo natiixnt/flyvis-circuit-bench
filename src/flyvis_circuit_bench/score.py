@@ -5,13 +5,13 @@ without the truth. `method_inputs` returns what the package offers a method (con
 a method may also use anything else it computes itself, e.g. from the flyvis models.
 
     from flyvis_circuit_bench import score
-    inputs = score.method_inputs("data/measurements-v1.0.0")
+    inputs = score.method_inputs("data/measurements-v1.1.0")
     scores = {m: x["sum_abs_weight"] / x["n_edges"] for m, x in inputs.items()}
-    result = score.evaluate(scores, "data/measurements-v1.0.0")
+    result = score.evaluate(scores, "data/measurements-v1.1.0")
     print(score.leaderboard_row("mean |weight| per edge", result))
 
 From the shell: save the scores with `numpy.savez(path, **scores)` (one array per model id) and run
-`fcb score --data data/measurements-v1.0.0 --scores path.npz --name "my method"`.
+`fcb score --data data/measurements-v1.1.0 --scores path.npz --name "my method"`.
 """
 
 from __future__ import annotations

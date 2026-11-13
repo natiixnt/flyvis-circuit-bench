@@ -1,8 +1,10 @@
 # Measurement package: data dictionary
 
-`measurements-v1.0.0.tar.gz` (38.5 MB, CC BY 4.0) is published as a GitHub Release asset. `fcb download`
-fetches it, checks the archive against the release `SHA256SUMS`, extracts it to `data/measurements-v1.0.0/`
-and checks every file against the `SHA256SUMS` inside. Files are byte-identical to the ones the study tables were
+`measurements-v1.1.0.tar.gz` (40.3 MB, CC BY 4.0) is published as a GitHub Release asset. `fcb download`
+fetches it, checks the archive against the release `SHA256SUMS`, extracts it to `data/measurements-v1.1.0/`
+and checks every file against the `SHA256SUMS` inside. Package 1.1.0 is package 1.0.0 (38.5 MB, still available
+with `fcb download --version 1.0.0`) byte for byte plus the directories `task/` and `silence/`. With 1.0.0
+`fcb reproduce` computes everything of the study and says that Z4 and Z6 need 1.1.0. Files are byte-identical to the ones the study tables were
 computed from; array keys keep the names used during the study, several of them Polish (translated below).
 Short codes of methods and networks in file names and keys are mapped to plain names in the
 [glossary](methodology.md#glossary).
@@ -60,6 +62,28 @@ Second stimulus set (24 moving bars), trained networks.
 | `P_F2`, `P_F2a`, `P_F2b`, `M1_F2`, `M1_F2_b` | | patching and gradient on the second set |
 | synapse count, sum of \|weights\| | 604 | as in `ablation/` |
 | `bodzce`, `podzial`, `uzyte` | 24 | bar identifiers, half (`F2a` or `F2b`), used flag |
+
+## task/C1_<model>.npz (package 1.1.0, Z4)
+
+Trained networks, models 000-009; written by `fcb measure --what task`. No decoded flow and no Sintel data.
+
+| key | shape | meaning |
+|---|---|---|
+| `T` | 604 | task effect: change of the flyvis flow loss (l2norm) on the 16 Sintel clips, ablated minus intact, mean over clips |
+| `D` | 604 | relative change of the decoded flow, ‖y_e - y_0‖ / ‖y_0‖ |
+| `loss_ref`, `loss_abl`, `change` | 16, 604 x 16, 604 x 16 | per clip loss of the intact network, of every ablation, and their difference |
+| `bodzce`, `zrodlo`, `cel` | 16, 604, 604 | clip identifiers, source and target cell type of the classes |
+
+## silence/C1_<model>.npz (package 1.1.0, Z6)
+
+Trained networks, models 000-009; written by `fcb measure --what silence`.
+
+| key | shape | meaning |
+|---|---|---|
+| `E_B`, `E_B1`, `E_B2` | 63 | effect of silencing all classes of one source cell type at once, on set B and its halves |
+| `wzgledne` | 63 x 40 | relative effect per type and stimulus |
+| `tipy`, `n_klas` | 63 | source cell types and the number of their classes |
+| `bodzce` | 40 | stimulus identifiers |
 
 ## Other files
 

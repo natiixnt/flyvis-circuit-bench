@@ -11,7 +11,7 @@ HEAVY = {"torch", "flyvis"}
 # Everything the code may import: standard library, this package, declared dependencies (and pytest in tests).
 # An allowlist instead of a denylist: nothing outside it, e.g. code of the original study, can sneak in.
 ALLOWED = set(sys.stdlib_module_names) | {"flyvis_circuit_bench", "numpy", "scipy", "matplotlib", "pytest",
-                                          "dotenv"} | HEAVY
+                                          "dotenv", "studydata"} | HEAVY
 
 
 def _imports(path: Path) -> list[tuple[str, int]]:
@@ -175,7 +175,7 @@ def test_initialization_auroc_and_flyhack_have_one_wording():
 def test_package_name_has_no_study_code():
     from flyvis_circuit_bench.download import PACKAGE
 
-    assert PACKAGE == "measurements-v1.0.0"
+    assert PACKAGE == "measurements-v1.1.0"
     bad = [str(p.relative_to(ROOT)) for p in _all_text_files()
            if re.search(r"\bw1[-_ ]?measurements", p.read_text(encoding="utf-8"), re.I)]
     assert bad == []

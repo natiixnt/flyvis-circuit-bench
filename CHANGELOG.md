@@ -4,6 +4,35 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-11-12
+
+### Added
+
+- README section "v1.1: exploratory analyses †" and one TL;DR sentence (variation between models). Every number in
+  the new text is checked against `results/results.json` by the tests.
+- Analyses after the study (exploratory, marked †, defined in `docs/analysis-plan-v1.1.md` before they were run),
+  one page each in `docs/v1.1/` and a block `v1_1` in `results/results.json`, recomputed by `fcb reproduce`:
+  - Z1: sensitivity to the threshold (0 swaps among 45 method pairs between the top 31 and the top 121);
+  - Z2: truth split by stimulus family (Spearman 0.991 between edges and Sintel clips);
+  - Z3: agreement between models (median Spearman of the effect 0.33, 3 core classes);
+  - Z4: task-level truth from the change of the optic-flow loss (Spearman with the ablation effect 0.667);
+  - Z6: silencing a whole cell type (Spearman 0.976 with the sum of its classes, 12 of 630 type x model pairs
+    break the dynamics).
+- Robustness to mean ablation instead of zeroing (`docs/v1.1/mean-ablation.md`): the order of the methods holds,
+  patching 0.974 against 0.987. Result of the research repository, not recomputed by `fcb reproduce`.
+- Measurement package 1.1.0: package 1.0.0 byte for byte plus `task/` (Z4) and `silence/` (Z6), 40.3 MB. `fcb
+  download` fetches 1.1.0 by default; `--version 1.0.0` fetches the original package.
+- `fcb measure --what task` and `--what silence`; `fcb figures --data` draws the connectome pictures and the
+  social preview.
+
+### Changed
+
+- Limitations and roadmap: mean ablation moved from "planned" to a result; new limits for the variation between
+  models, for silencing and for the small task truth. The Quickstart points to package 1.1.0.
+- With package 1.0.0 `fcb reproduce` computes the v1.0 results and says that Z4 and Z6 need package 1.1.0; their
+  committed results are neither compared nor overwritten.
+- Version 1.1.0 in `CITATION.cff`, `pyproject.toml` and the package.
+
 ## [1.0.1] - 2026-11-12
 
 ### Fixed

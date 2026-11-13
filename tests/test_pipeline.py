@@ -97,3 +97,39 @@ def test_markdown_has_no_long_dashes(results):
 
     text = render_markdown(results)
     assert chr(0x2014) not in text and chr(0x2013) not in text
+
+
+def test_reproduce_on_package_without_task_and_silence_keeps_their_results(package, tmp_path, capsys):
+    j, md = tmp_path / "r.json", tmp_path / "r.md"
+    assert main(["reproduce", "--data", str(package), "--json", str(j), "--markdown", str(md)]) == 0
+    committed = json.loads(j.read_text(encoding="utf-8"))
+    committed["v1_1"]["z4"] = {"kept": 1}  # results of a package 1.1.0 that this package cannot recompute
+    committed["v1_1"]["z6"] = {"kept": 2}
+    j.write_text(json.dumps(committed), encoding="utf-8")
+    capsys.readouterr()
+    assert main(["reproduce", "--data", str(package), "--json", str(j), "--markdown", str(md), "--check"]) == 0
+    err = capsys.readouterr().err
+    assert "not computed: Z4, Z6" in err and "package 1.1.0" in err
+    committed["headline"]["D_C1_N5"]["mean"] += 0.5  # a changed v1.0 key is still red
+    j.write_text(json.dumps(committed), encoding="utf-8")
+    assert main(["reproduce", "--data", str(package), "--json", str(j), "--markdown", str(md), "--check"]) == 1
+    assert main(["reproduce", "--data", str(package), "--json", str(j), "--markdown", str(md)]) == 0
+    kept = json.loads(j.read_text(encoding="utf-8"))["v1_1"]
+    assert kept["z4"] == {"kept": 1} and kept["z6"] == {"kept": 2} and list(kept)[-2:] == ["z4", "z6"]
+
+
+def test_verify_checks_the_v1_1_files_listed_in_the_sums(package, tmp_path):
+    copy = tmp_path / "pkg"
+    shutil.copytree(package, copy)
+    (copy / "task").mkdir()
+    (copy / "task" / "C1_000.npz").write_bytes(b"x")
+    sums = (copy / "SHA256SUMS").read_text(encoding="utf-8")
+    import hashlib
+
+    (copy / "SHA256SUMS").write_text(sums + f"{hashlib.sha256(b'x').hexdigest()}  task/C1_000.npz\n"
+                                     f"{hashlib.sha256(b'y').hexdigest()}  silence/C1_000.npz\n", encoding="utf-8")
+    problems = D.verify(copy)
+    assert problems == ["missing: silence/C1_000.npz"]
+    (copy / "task" / "C1_000.npz").write_bytes(b"tampered")
+    assert "checksum mismatch: task/C1_000.npz" in D.verify(copy)
+    assert D.v11_files()[0] == "silence/C1_000.npz" and len(D.v11_files()) == 20

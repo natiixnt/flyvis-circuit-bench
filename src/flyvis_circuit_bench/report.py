@@ -357,4 +357,49 @@ def readme_facts(r: dict) -> dict[str, str]:
     ex = r.get("readme_example")
     if ex:
         out["example_auroc"] = f(ex["AUROC"]["pooled"]["mean"])
+    if r.get("v1_1"):
+        out.update(readme_facts_v11(r["v1_1"]))
+    return out
+
+
+def readme_facts_v11(v: dict) -> dict[str, str]:
+    """The numbers of the README section on the v1.1 analyses (and the one TL;DR sentence), as printed there."""
+    out: dict[str, str] = {}
+    if "z1" in v:
+        z = v["z1"]
+        for met in ("S", "P"):
+            a = [x["AUROC"]["pooled"]["mean"] for x in z["table"] if x["method"] == met]
+            out[f"v11_z1_{met}_lo"], out[f"v11_z1_{met}_hi"] = f(min(a)), f(max(a))
+        out["v11_z1_swaps"] = str(len(z["pairs"]["pooled"]["swaps"]))
+        out["v11_z1_pairs"] = str(len(z["methods"]) * (len(z["methods"]) - 1) // 2)
+    if "z2" in v:
+        z = v["z2"]
+        out["v11_z2_spearman"] = f(z["agreement"]["spearman"]["pooled"]["mean"])
+        for fam in ("edges", "sintel"):
+            out[f"v11_z2_P_{fam}"] = f(z["ladder"]["P"][fam]["AUROC"]["pooled"]["mean"])
+            out[f"v11_z2_S_{fam}"] = f(z["ladder"]["S"][fam]["AUROC"]["pooled"]["mean"])
+    if "z3" in v:
+        z = v["z3"]
+        out["v11_z3_median_spearman"] = f"{z['pairs']['pooled']['spearman']['median']:.2f}"
+        out["v11_z3_overlap"] = f"{z['pairs']['pooled']['overlap']['median']:.0f}"
+        out["v11_z3_core"] = str(z["blocks"]["pooled"]["group_sizes"]["core"])
+        out["v11_z3_core_min"] = str(z["blocks"]["pooled"]["core_min"])
+        out["v11_z3_split_half"] = f"{z['split_half_spearman']['pooled']['mean']:.2f}"
+        c = z["cross_model_auroc"]
+        out["v11_z3_other_model"] = f(c["model_a_e"]["mean"])
+        out["v11_z3_anatomy"] = f(c["synapse_count"]["mean"])
+        out["v11_z3_better"], out["v11_z3_pairs"] = str(c["n_pairs_a_better"]), str(c["n_pairs"])
+    if "z4" in v:
+        z = v["z4"]
+        out["v11_z4_spearman"] = f(z["spearman_E_T"]["pooled"]["mean"])
+        out["v11_z4_high_low"] = str(z["pooled_mean_table"]["high_E_low_T"])
+        out["v11_z4_both"] = str(z["pooled_mean_table"]["high_E_high_T"])
+        out["v11_z4_ceiling"] = f(z["ceiling"]["pooled"]["mean"])
+    if "z6" in v:
+        z = v["z6"]
+        out["v11_z6_spearman"] = f(z["spearman_sum"]["pooled"]["mean"])
+        out["v11_z6_masking"] = str(len(z["masking_types"]))
+        out["v11_z6_reverse"] = str(len(z["reverse_types"]))
+        out["v11_z6_exploding"], out["v11_z6_pairs"] = str(z["exploding"]["pairs"]), str(z["exploding"]["pairs_total"])
+        out["v11_z6_types"] = str(z["n_types"])
     return out

@@ -11,13 +11,14 @@ import warnings
 from pathlib import Path
 
 from . import __version__
-from .download import DATA_VERSION
+from .download import DATA_VERSION, VERSIONS
 from .names import CONDITION_CODES
 
 DEFAULT_OWNER = "natiixnt"
 
 
-def _results(data_dir: Path) -> dict:
+def _results(data_dir: Path) -> tuple[dict, list[str]]:
+    """(results, keys of the v1.1 analyses the package has no data for)."""
     from . import analysis, data
 
     problems = data.verify(data_dir)
@@ -26,15 +27,43 @@ def _results(data_dir: Path) -> dict:
     with warnings.catch_warnings():
         # scipy warns about constant inputs for c1 on single models; those values are nan and reported as such
         warnings.simplefilter("ignore")
-        return analysis.analyze(data.load(data_dir))
+        loaded = data.load(data_dir)
+        results = analysis.analyze(loaded)
+        from . import v11
+
+        results["v1_1"] = v11.analyze_all(loaded)
+        return results, v11.unavailable(loaded)
 
 
 def cmd_reproduce(a: argparse.Namespace) -> int:
-    from . import report
+    from . import data, report
 
     t0 = time.perf_counter()
-    r = _results(a.data)
-    outputs = {a.json: report.to_json(r), a.markdown: report.render_markdown(r)}
+    r, missing = _results(a.data)
+    from . import v11
+
+    committed = json.loads(a.json.read_text(encoding="utf-8")) if a.json.is_file() else {}
+    outputs = {a.json: report.to_json(r), a.markdown: report.render_markdown(r),
+               **v11.outputs(r, a.markdown.parent)}
+    if missing:
+        # package v1.0.0: only the v1.0 keys and the analyses it has data for are computed; the others are
+        # neither compared nor overwritten
+        old = {k: v for k, v in committed.get("v1_1", {}).items()}
+        if a.check:
+            committed["v1_1"] = {k: v for k, v in old.items() if k not in missing}
+            outputs[a.json] = report.to_json(r)
+            if report.to_json(committed) != outputs[a.json]:
+                print("reproduction differs from the committed files: " + str(a.json), file=sys.stderr)
+                return 1
+            del outputs[a.json]
+        else:
+            r["v1_1"] = {k: r["v1_1"].get(k, old.get(k)) for k in v11.MODULES
+                         if k in r["v1_1"] or k in old}
+            outputs[a.json] = report.to_json(r)
+        version = data.package_version(a.data) or "?"
+        print(f"not computed: {', '.join(k.upper() for k in missing)} (the package {version} has no task/ and "
+              "silence/ files; use package 1.1.0, `fcb download`); the committed results of these analyses are "
+              "kept and not compared", file=sys.stderr)
     if a.check:
         bad = [str(p) for p, text in outputs.items()
                if not p.is_file() or p.read_text(encoding="utf-8") != text]
@@ -98,7 +127,7 @@ def cmd_download(a: argparse.Namespace) -> int:
         sums = a.sums.read_text(encoding="utf-8") if a.sums else None
         target = download.install(a.archive, sums, a.dest)
     else:
-        target = download.download(owner, a.dest, repo=a.repo, tag=a.tag)
+        target = download.download(owner, a.dest, repo=a.repo, tag=a.tag, version=a.version)
     print(f"verified package in {target}")
     print(f"next: fcb reproduce --data {target}")
     return 0
@@ -118,7 +147,17 @@ def cmd_figures(a: argparse.Namespace) -> int:
     from . import figures
 
     results = json.loads(a.results.read_text(encoding="utf-8"))
-    for p in figures.make_all(results, a.out):
+    from . import v11
+
+    paths = figures.make_all(results, a.out) + v11.make_figures(results, a.out)
+    if a.data is not None:  # the connectome pictures are drawn from the measurement package, not from results.json
+        from . import connectome, data
+
+        problems = data.verify(a.data)
+        if problems:
+            raise SystemExit("measurement package incomplete or modified:\n  " + "\n  ".join(problems[:20]))
+        paths += connectome.make_figures(data.load(a.data), a.out, results)
+    for p in paths:
         print(p)
     return 0
 
@@ -128,7 +167,8 @@ def cmd_measure(a: argparse.Namespace) -> int:
 
     try:
         paths = run.measure(a.what, CONDITION_CODES[a.condition], a.model, a.stimuli, a.out, device=a.device, k=a.k,
-                            sintel_dir=a.sintel)
+                            sintel_dir=a.sintel, flow_dir=a.flow_dir, classes=a.classes,
+                            store_flow=a.store_flow, types=a.types)
     except ImportError as e:  # pragma: no cover - depends on the optional extra
         print(f"the measurement path needs the [measure] extra (flyvis + torch): {e}", file=sys.stderr)
         return 2
@@ -164,7 +204,10 @@ def build_parser() -> argparse.ArgumentParser:
     d = sub.add_parser("download", help="download and verify the measurement package from a GitHub Release")
     d.add_argument("--owner", help=f"GitHub account hosting the release (default: FCB_OWNER or {DEFAULT_OWNER})")
     d.add_argument("--repo", default="flyvis-circuit-bench")
-    d.add_argument("--tag", default=f"v{DATA_VERSION}")
+    d.add_argument("--version", default=DATA_VERSION, choices=VERSIONS,
+                   help=f"package version (default {DATA_VERSION}: with task/ and silence/ for Z4 and Z6; "
+                        "1.0.0 is the original package of the study)")
+    d.add_argument("--tag", help="release tag (default: v<version>)")
     d.add_argument("--dest", type=Path, default=Path("data"))
     d.add_argument("--archive", type=Path, help="install from a local copy of the archive instead")
     d.add_argument("--sums", type=Path, help="release SHA256SUMS for --archive")
@@ -177,14 +220,19 @@ def build_parser() -> argparse.ArgumentParser:
     f = sub.add_parser("figures", help="render the figures from results/results.json")
     f.add_argument("--results", type=Path, default=Path("results/results.json"))
     f.add_argument("--out", type=Path, default=Path("docs/figures"))
+    f.add_argument("--data", type=Path, help="measurement package: also draws the connectome pictures and the "
+                   "social preview")
     f.set_defaults(func=cmd_figures)
 
     m = sub.add_parser("measure", help="re-measure the truth and every leaderboard method for one model "
                        "(needs the [measure] extra)")
-    m.add_argument("--what", choices=("ablation", "cheap", "sae", "structure", "all"), default="ablation",
+    m.add_argument("--what", choices=("ablation", "cheap", "sae", "structure", "silence", "task", "all"),
+                   default="ablation",
                    help="ablation: truth, synapse count, sum of |weights|, patching; cheap: gradient, |weights| x "
                    "neuron activity; sae: |weights| x source activity, |weights| x source SAE code (and the data of "
-                   "the two rows without weights); structure: class size; all: every step")
+                   "the two rows without weights); structure: class size; silence: effect of silencing a whole source "
+                   "cell type (v1.1 Z6, not part of all); task: effect of every ablation on the "
+                   "decoded optic flow (v1.1 Z4, needs --flow-dir, not part of all); all: every other step")
     m.add_argument("--condition", choices=tuple(CONDITION_CODES), required=True,
                    help="trained (released checkpoint) or untrained (flyvis initialization)")
     m.add_argument("--model", required=True, help="model id of the flyvis ensemble flow/0000, e.g. 000")
@@ -193,6 +241,13 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--device", default="cpu")
     m.add_argument("--k", type=int, default=32, help="random output directions for patching")
     m.add_argument("--sintel", type=Path, help="MPI Sintel directory (default: $FLYVIS_ROOT_DIR/sintel)")
+    m.add_argument("--flow-dir", type=Path, help="step task: directory with MPI Sintel training/flow")
+    m.add_argument("--classes", type=lambda s: [int(x) for x in s.split(",")],
+                   help="step task: only these class indices, comma separated (smoke and cost runs)")
+    m.add_argument("--types", type=lambda s: s.split(","),
+                   help="step silence: only these source types, comma separated (smoke and cost runs)")
+    m.add_argument("--store-flow", choices=("float16", "float32", "none"), default="float16",
+                   help="step task: precision of the stored decoded flow of every ablation (none: skip)")
     m.set_defaults(func=cmd_measure)
     return ap
 

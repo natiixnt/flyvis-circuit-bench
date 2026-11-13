@@ -19,10 +19,17 @@ from . import __version__
 from .data import CHECKSUMS, read_checksums, verify
 
 REPO = "flyvis-circuit-bench"
-# The measurement package is unchanged since v1.0.0 (same sha256) and stays attached to that release.
-DATA_VERSION = "1.0.0"
+# Package 1.1.0 = package 1.0.0 byte for byte plus task/ and silence/ (Z4, Z6). Version 1.0.0 stays available.
+DATA_VERSION = "1.1.0"
+VERSIONS = ("1.0.0", "1.1.0")
 PACKAGE = f"measurements-v{DATA_VERSION}"
 ASSET = f"{PACKAGE}.tar.gz"
+
+
+def asset_name(version: str = DATA_VERSION) -> str:
+    if version not in VERSIONS:
+        raise ValueError(f"unknown data version {version!r}; available: {', '.join(VERSIONS)}")
+    return f"measurements-v{version}.tar.gz"
 USER_AGENT = f"{REPO}/{__version__}"
 
 
@@ -96,13 +103,18 @@ def install(archive: Path, sums_text: str | None, dest_parent: Path) -> Path:
     return target
 
 
-def download(owner: str, dest_parent: Path, repo: str = REPO, tag: str = f"v{DATA_VERSION}") -> Path:
-    """Fetch the release asset and its SHA256SUMS, verify, extract; returns the package directory."""
+def download(owner: str, dest_parent: Path, repo: str = REPO, tag: str | None = None,
+             version: str = DATA_VERSION) -> Path:
+    """Fetch the release asset and its SHA256SUMS, verify, extract; returns the package directory.
+
+    `version` picks the package (default 1.1.0); `tag` is the release tag, default `v<version>`."""
+    asset = asset_name(version)
+    tag = tag or f"v{version}"
     dest_parent = Path(dest_parent)
     dest_parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
-        archive = Path(tmp) / ASSET
+        archive = Path(tmp) / asset
         sums = Path(tmp) / CHECKSUMS
         _fetch(release_url(owner, CHECKSUMS, repo, tag), sums)
-        _fetch(release_url(owner, ASSET, repo, tag), archive)
+        _fetch(release_url(owner, asset, repo, tag), archive)
         return install(archive, sums.read_text(encoding="utf-8"), dest_parent)
