@@ -33,4 +33,5 @@ jobs:
       - name: Figures render from the committed results
         run: |
           uv run fcb figures --out /tmp/figures
-          diff <(ls /tmp/figures) <(ls docs/figures)
+          # connectome pictures and the social preview need the measurement package (fcb figures --data)
+          diff <(ls /tmp/figures) <(ls docs/figures | grep -v -e '^connectome-' -e '^social-preview')
