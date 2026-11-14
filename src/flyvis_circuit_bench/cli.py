@@ -61,9 +61,10 @@ def cmd_reproduce(a: argparse.Namespace) -> int:
                          if k in r["v1_1"] or k in old}
             outputs[a.json] = report.to_json(r)
         version = data.package_version(a.data) or "?"
-        print(f"not computed: {', '.join(k.upper() for k in missing)} (the package {version} has no task/ and "
-              "silence/ files; use package 1.1.0, `fcb download`); the committed results of these analyses are "
-              "kept and not compared", file=sys.stderr)
+        needs = "; ".join(f"{k.upper()} needs package {data.NEEDS_PACKAGE.get(k, '?')}" for k in missing)
+        print(f"not computed: {', '.join(k.upper() for k in missing)} (the package {version} lacks their files: "
+              f"{needs}; `fcb download`); the committed results of these analyses are kept and not compared",
+              file=sys.stderr)
     if a.check:
         bad = [str(p) for p, text in outputs.items()
                if not p.is_file() or p.read_text(encoding="utf-8") != text]
@@ -168,7 +169,8 @@ def cmd_measure(a: argparse.Namespace) -> int:
     try:
         paths = run.measure(a.what, CONDITION_CODES[a.condition], a.model, a.stimuli, a.out, device=a.device, k=a.k,
                             sintel_dir=a.sintel, flow_dir=a.flow_dir, classes=a.classes,
-                            store_flow=a.store_flow, types=a.types)
+                            store_flow=a.store_flow, types=a.types, backend=a.backend,
+                            max_stimuli=a.max_stimuli, n_stimuli=a.n_stimuli)
     except ImportError as e:  # pragma: no cover - depends on the optional extra
         print(f"the measurement path needs the [measure] extra (flyvis + torch): {e}", file=sys.stderr)
         return 2
@@ -205,8 +207,8 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("--owner", help=f"GitHub account hosting the release (default: FCB_OWNER or {DEFAULT_OWNER})")
     d.add_argument("--repo", default="flyvis-circuit-bench")
     d.add_argument("--version", default=DATA_VERSION, choices=VERSIONS,
-                   help=f"package version (default {DATA_VERSION}: with task/ and silence/ for Z4 and Z6; "
-                        "1.0.0 is the original package of the study)")
+                   help=f"package version (default {DATA_VERSION}: with task/, silence/ and hvp/ for Z4, Z6 and "
+                        "Z7; 1.1.0 has no hvp/, 1.0.0 is the original package of the study)")
     d.add_argument("--tag", help="release tag (default: v<version>)")
     d.add_argument("--dest", type=Path, default=Path("data"))
     d.add_argument("--archive", type=Path, help="install from a local copy of the archive instead")
@@ -226,13 +228,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     m = sub.add_parser("measure", help="re-measure the truth and every leaderboard method for one model "
                        "(needs the [measure] extra)")
-    m.add_argument("--what", choices=("ablation", "cheap", "sae", "structure", "silence", "task", "all"),
+    m.add_argument("--what", choices=("ablation", "cheap", "sae", "structure", "silence", "task", "hvp", "all"),
                    default="ablation",
                    help="ablation: truth, synapse count, sum of |weights|, patching; cheap: gradient, |weights| x "
                    "neuron activity; sae: |weights| x source activity, |weights| x source SAE code (and the data of "
                    "the two rows without weights); structure: class size; silence: effect of silencing a whole source "
                    "cell type (v1.1 Z6, not part of all); task: effect of every ablation on the "
-                   "decoded optic flow (v1.1 Z4, needs --flow-dir, not part of all); all: every other step")
+                   "decoded optic flow (v1.1 Z4, needs --flow-dir, not part of all); "
+                   "hvp: patching with a second-order correction (v1.1 Z7, not part of all); all: every other step")
     m.add_argument("--condition", choices=tuple(CONDITION_CODES), required=True,
                    help="trained (released checkpoint) or untrained (flyvis initialization)")
     m.add_argument("--model", required=True, help="model id of the flyvis ensemble flow/0000, e.g. 000")
@@ -243,11 +246,16 @@ def build_parser() -> argparse.ArgumentParser:
     m.add_argument("--sintel", type=Path, help="MPI Sintel directory (default: $FLYVIS_ROOT_DIR/sintel)")
     m.add_argument("--flow-dir", type=Path, help="step task: directory with MPI Sintel training/flow")
     m.add_argument("--classes", type=lambda s: [int(x) for x in s.split(",")],
-                   help="step task: only these class indices, comma separated (smoke and cost runs)")
+                   help="steps task and hvp: only these class indices, comma separated (smoke and cost runs)")
     m.add_argument("--types", type=lambda s: s.split(","),
                    help="step silence: only these source types, comma separated (smoke and cost runs)")
     m.add_argument("--store-flow", choices=("float16", "float32", "none"), default="float16",
                    help="step task: precision of the stored decoded flow of every ablation (none: skip)")
+    m.add_argument("--backend", choices=("forward", "reverse"), default="forward",
+                   help="step hvp: nested forward mode (default) or double backward (reference)")
+    m.add_argument("--max-stimuli", type=int, help="step hvp: only the first N stimuli (smoke and cost runs)")
+    m.add_argument("--n-stimuli", type=int, help="step hvp: the preregistered random subset of N stimuli "
+                   "(seed 20261101; the study run uses 8)")
     m.set_defaults(func=cmd_measure)
     return ap
 

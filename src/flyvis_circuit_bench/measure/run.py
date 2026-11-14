@@ -13,6 +13,8 @@ tests can use it:
     structure  structure.npz                 class size (connectome only); seconds
     silence    silence/C1_<model>.npz        v1.1 Z6: effect of silencing a whole source cell type (63 types), minutes;
                                              not in `all`
+    hvp        hvp/C1_<model>.npz            v1.1 Z7: patching with a second-order (Hessian) correction on the diagonal,
+                                             resumable (per-stimulus state files); not in `all`
     task       task/C1_<model>.npz           v1.1 Z4: effect of every ablation on the decoded optic flow (loss and
                                              change), needs the Sintel ground truth flow (`--flow-dir`); not in `all`
 
@@ -202,13 +204,20 @@ def torch_cpu() -> None:
 
 def measure(what: str, condition: str, model: str, stimuli: Path, out: Path, device: str = "cpu", k: int = 32,
             sintel_dir: Path | None = None, flow_dir: Path | None = None, classes: list[int] | None = None,
-            store_flow: str = "float16", types: list[str] | None = None) -> list[Path]:
+            store_flow: str = "float16", types: list[str] | None = None, backend: str = "forward",
+            max_stimuli: int | None = None, n_stimuli: int | None = None) -> list[Path]:
     """One step of `STEPS` or "all" (for the untrained network: ablation and structure); `cheap` and `sae` only for
     the trained network."""
     if types is not None and what != "silence":
         raise ValueError("--types applies to the silence step only")
-    if classes is not None and what != "task":
-        raise ValueError("--classes applies to the task step only")
+    if classes is not None and what not in ("task", "hvp"):
+        raise ValueError("--classes applies to the task step only (and the hvp step)")
+    if what == "hvp":  # v1.1 Z7, trained network only, not part of "all"
+        if condition != "C1":
+            raise ValueError("the hvp step exists for trained networks only")
+        from . import hvp
+
+        return [hvp.measure_hvp(model, stimuli, out, device, k, backend, classes, max_stimuli, n_stimuli=n_stimuli)]
     if what == "silence":  # v1.1 Z6, trained network only, not part of "all"
         if condition != "C1":
             raise ValueError("the silence step exists for trained networks only")

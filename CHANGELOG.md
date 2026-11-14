@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-11-14
+
+### Added
+
+- Z7 †: patching with a second-order correction (Hessian-vector product), exploratory, defined in
+  `docs/analysis-plan-v1.1.md` before it was run (`docs/v1.1/z7.md`, block `v1_1.z7` in `results/results.json`).
+  On the same 8 stimuli patching reaches 0.969 of the achievable signal and the corrected score 0.971; the AUROC
+  changes by +0.0007 [-0.0009, +0.0021].
+- Measurement package 1.1.1: package 1.1.0 byte for byte plus `hvp/` (Z7). `fcb download` fetches 1.1.1 by default;
+  `--version 1.1.0` and `--version 1.0.0` fetch the older packages.
+- `fcb measure --what hvp`.
+
+### Changed
+
+- `fcb reproduce` on package 1.1.0 computes everything except Z7 and says that Z7 needs 1.1.1; the committed block of
+  an analysis a package cannot recompute is kept and not compared.
+
 ## [1.1.0] - 2026-11-12
 
 ### Added

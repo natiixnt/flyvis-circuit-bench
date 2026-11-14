@@ -1,8 +1,8 @@
 """Where the tests look for the real measurement package.
 
-Order: `FCB_DATA`, `data/measurements-v1.1.0` (what `fcb download` writes), `data/wydanie/measurements-v1.1.0` of the
-research repository around this directory, then the old package `data/measurements-v1.0.0` (Z4 and Z6 are then not
-recomputed). With `REQUIRE_STUDY_DATA=1` only package 1.1.0 is accepted (`test_study_data_is_package_1_1_0`).
+Order: `FCB_DATA`, `data/measurements-v1.1.1` (what `fcb download` writes), `data/wydanie/measurements-v1.1.1` of the
+research repository around this directory, then the old package `data/measurements-v1.0.0` (Z4, Z6 and Z7 are then not
+recomputed). With `REQUIRE_STUDY_DATA=1` only package 1.1.1 is accepted (`test_study_data_is_package_1_1_1`).
 """
 
 import os
@@ -12,9 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _candidates() -> list[Path]:
-    out = [ROOT / "data" / "measurements-v1.1.0"]
+    out = [ROOT / "data" / "measurements-v1.1.1"]
     if len(ROOT.parents) > 1:
-        out.append(ROOT.parents[1] / "data" / "wydanie" / "measurements-v1.1.0")
+        out.append(ROOT.parents[1] / "data" / "wydanie" / "measurements-v1.1.1")
     return out + [ROOT / "data" / "measurements-v1.0.0"]
 
 

@@ -1,5 +1,5 @@
 # Common tasks. Every target is a thin wrapper around uv; run `make help` for the list.
-DATA ?= data/measurements-v1.1.0
+DATA ?= data/measurements-v1.1.1
 OWNER ?= natiixnt
 
 .PHONY: help sync check lint test download reproduce figures

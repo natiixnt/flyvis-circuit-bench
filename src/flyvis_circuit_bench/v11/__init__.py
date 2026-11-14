@@ -17,7 +17,7 @@ import importlib
 from pathlib import Path
 
 # The order is the order of the keys in results.json, which is published, so it is fixed (z2 was added first).
-MODULES = ("z2", "z1", "z3", "z4", "z6")
+MODULES = ("z2", "z1", "z3", "z4", "z6", "z7")
 
 
 def modules() -> list:

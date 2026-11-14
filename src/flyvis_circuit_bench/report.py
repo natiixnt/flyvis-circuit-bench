@@ -402,4 +402,12 @@ def readme_facts_v11(v: dict) -> dict[str, str]:
         out["v11_z6_reverse"] = str(len(z["reverse_types"]))
         out["v11_z6_exploding"], out["v11_z6_pairs"] = str(z["exploding"]["pairs"]), str(z["exploding"]["pairs_total"])
         out["v11_z6_types"] = str(z["n_types"])
+    if "z7" in v:
+        z = v["z7"]
+        out["v11_z7_share_P"] = f(z["methods"]["P"]["signal_share"]["pooled"]["mean"])
+        out["v11_z7_share_PH"] = f(z["methods"]["P+HVP"]["signal_share"]["pooled"]["mean"])
+        out["v11_z7_stimuli"] = str(z["n_stimuli"])
+        d = z["diff"]["AUROC"]["pooled"]
+        out["v11_z7_dauroc"] = f"{d['mean']:+.4f}"
+        out["v11_z7_ci"] = f"[{d['ci_bootstrap'][0]:+.4f}, {d['ci_bootstrap'][1]:+.4f}]"
     return out

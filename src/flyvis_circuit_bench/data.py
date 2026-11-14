@@ -43,6 +43,15 @@ def v11_files() -> list[str]:
     return sorted([f"task/C1_{m}.npz" for m in MODELS_POOLED] + [f"silence/C1_{m}.npz" for m in MODELS_POOLED])
 
 
+def v111_files() -> list[str]:
+    """Files added in package v1.1.1 (Z7 patching with a second-order correction); v1.1.0 does not have them."""
+    return sorted(f"hvp/C1_{m}.npz" for m in MODELS_POOLED)
+
+
+# the package that first has the data of each analysis (the others are computed from any later package)
+NEEDS_PACKAGE = {"z4": "1.1.0", "z6": "1.1.0", "z7": "1.1.1"}
+
+
 def package_version(data_dir: Path) -> str | None:
     """Version in MANIFEST.json of the package directory (None when there is no readable manifest)."""
     try:
@@ -87,7 +96,7 @@ def verify(data_dir: Path) -> list[str]:
             problems.append(f"not listed in {CHECKSUMS}: {rel}")
         elif sha256_file(p) != sums[rel]:
             problems.append(f"checksum mismatch: {rel}")
-    for rel in sorted(set(sums) - set(required_files())):  # files of v1.1.0 (task/, silence/): all or none
+    for rel in sorted(set(sums) - set(required_files())):  # files of 1.1.x (task/, silence/, hvp/): all or none
         p = data_dir / rel
         if not p.is_file():
             problems.append(f"missing: {rel}")
@@ -118,6 +127,7 @@ def load(data_dir: Path) -> dict:
         "F2": "f2/C1_{m}.npz",
         "SIL": "silence/C1_{m}.npz",  # v1.1 Z6, optional (fcb measure --what silence)
         "T": "task/C1_{m}.npz",  # v1.1 Z4, optional (fcb measure --what task)
+        "HVP": "hvp/C1_{m}.npz",  # v1.1 Z7, optional (fcb measure --what hvp)
     }
     models: dict[str, dict] = {}
     for m in MODELS_POOLED:

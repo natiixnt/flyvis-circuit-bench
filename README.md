@@ -123,7 +123,7 @@ so before training each weight is a fixed function of the anatomy; training move
 ## v1.1: exploratory analyses †
 
 Added after the study, defined in [docs/analysis-plan-v1.1.md](docs/analysis-plan-v1.1.md) before they were run,
-marked †; none changes a preregistered decision. `fcb reproduce` recomputes them from package 1.1.0.
+marked †; none changes a preregistered decision. `fcb reproduce` recomputes them from package 1.1.1.
 
 - **Threshold ([Z1](docs/v1.1/z1.md)).** Moving the cut from the top 31 to the top 121 classes reorders no pair of
   methods (0 swaps among 45 pairs); synapse count stays between AUROC 0.745 and 0.763, patching between 0.982 and
@@ -142,6 +142,9 @@ marked †; none changes a preregistered decision. `fcb reproduce` recomputes th
   once has an effect with Spearman 0.976 to the sum of the effects of its classes; 12 types are masking and 7 are
   reverse. In 12 of 630 type x model pairs silencing breaks the dynamics of the network, so these conclusions rest on
   ranks.
+- **Second-order correction ([Z7](docs/v1.1/z7.md)).** Patching with a Hessian-vector product correction reaches
+  0.971 of the achievable signal against 0.969 for patching on the same 8 stimuli; the AUROC changes by +0.0007
+  [-0.0009, +0.0021], so the interval includes zero.
 - **Mean ablation ([result of the research repository](docs/v1.1/mean-ablation.md)).** Replacing the current of a
   class by its mean instead of zero keeps the order of the methods: patching 0.974 (0.987 for zeroing), synapse
   count 0.777 (0.763). This one is not recomputed by `fcb reproduce`, the measurements are not in the package.
@@ -236,7 +239,7 @@ pin down the dynamics: [docs/related_work.md](docs/related_work.md).
 - **Byte-identical reproduction.** `fcb reproduce --check` recomputes `results/results.json` and
   `docs/results.md` and compares them byte for byte; CI checks the code path on synthetic data on every push.
 - **Checksums.** The release asset ships with `SHA256SUMS`; `fcb download` verifies the archive and every file
-  inside it (sha256 of the archive 1.1.0 `sha256:f21ee4573834dbfad4517da00da200c590df9f544a0d26df8d26b24f48db2bb3`; of the archive 1.0.0 `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). The
+  inside it (sha256 of the archive 1.1.1 `sha256:ffcac2796b6748dd451bacc9b46515dd1c1b9755428cbf9bec12e6f79b7eb33d`; of the archive 1.1.0 `sha256:f21ee4573834dbfad4517da00da200c590df9f544a0d26df8d26b24f48db2bb3`; of the archive 1.0.0 `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). The
   measurement files are byte-identical to the ones the study tables were computed from.
 - **Determinism.** Fixed seeds (bootstrap 20261101, random directions per stimulus), sorted model order,
   figures without timestamps. Two devices were used (Apple silicon for models 000-004, CUDA for 005-009 and the

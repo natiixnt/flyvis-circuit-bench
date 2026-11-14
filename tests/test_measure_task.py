@@ -88,7 +88,7 @@ def test_sink_receives_intact_and_every_measured_ablation():
 @pytest.mark.measure
 @pytest.mark.skipif(not HAS_FLYVIS, reason="needs the [measure] extra and flyvis data")
 def test_flyvis_task_five_classes_twice_gives_the_same_T(tmp_path):
-    stimuli = Path(os.environ.get("FCB_STIMULI", "data/measurements-v1.1.0/stimuli_B.json"))
+    stimuli = Path(os.environ.get("FCB_STIMULI", "data/measurements-v1.1.1/stimuli_B.json"))
     flow = os.environ.get("FCB_SINTEL_FLOW")
     if not stimuli.is_file() or not flow:
         pytest.skip("needs stimuli_B.json and FCB_SINTEL_FLOW (MPI Sintel training/flow)")

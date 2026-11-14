@@ -102,7 +102,7 @@ def test_real_package_family_split_consistent_with_stored_truth():
     pkg = _package()
     if pkg is None:
         if os.environ.get("REQUIRE_STUDY_DATA") == "1":
-            pytest.fail("the measurement package 1.1.0 is required (FCB_DATA or data/measurements-v1.1.0)")
+            pytest.fail("the measurement package 1.1.1 is required (FCB_DATA or data/measurements-v1.1.1)")
         pytest.skip("measurement package not available (set FCB_DATA)")
     data = D.load(pkg)
     r = z2.analyze(data)

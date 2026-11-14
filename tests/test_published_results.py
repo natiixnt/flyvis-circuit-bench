@@ -39,7 +39,7 @@ TLDR_FACTS = ("share_P", "auroc_P", "share_S", "auroc_S", "p61_count_S", "share_
               "share_M1", "auroc_M1", "auroc_M5", "dd_top61",
               "auroc_act", "share_act", "auroc_S_act", "share_S_act")
 # Numbers in the README prose that are not results: versions, sizes, constants of the method, citation, years.
-NOT_RESULTS = {"1.0.0", "1.0.1", "1.1.0", "38.5", "40.3", "31", "91", "121", "1000",
+NOT_RESULTS = {"1.0.0", "1.0.1", "1.1.0", "1.1.1", "38.5", "40.3", "31", "91", "121", "1000",
                "3.11", "3.12", "3.13", "0.01", "0.5", "1132", "1140", "634", "2024", "2026",
                "604", "61", "10", "32", "40", "24", "16", "000", "004", "005", "009", "5", "4", "1", "0", "100%", "0%",
                "20261101", "10%", "95%", "4.0", "440", "520"}
@@ -105,7 +105,8 @@ V11_FACTS = (
     "v11_z2_P_edges", "v11_z2_P_sintel", "v11_z2_S_edges", "v11_z2_S_sintel", "v11_z3_median_spearman",
     "v11_z3_core", "v11_z3_core_min", "v11_z3_split_half", "v11_z3_other_model", "v11_z3_anatomy",
     "v11_z3_better", "v11_z3_pairs", "v11_z4_spearman", "v11_z4_both", "v11_z4_high_low", "v11_z6_spearman",
-    "v11_z6_masking", "v11_z6_reverse", "v11_z6_exploding", "v11_z6_pairs", "v11_z6_types")
+    "v11_z6_masking", "v11_z6_reverse", "v11_z6_exploding", "v11_z6_pairs", "v11_z6_types",
+    "v11_z7_share_P", "v11_z7_share_PH", "v11_z7_stimuli", "v11_z7_dauroc", "v11_z7_ci")
 
 
 @pytest.mark.parametrize("readme", READMES)
@@ -204,12 +205,12 @@ def test_readme_example_scores_what_the_readme_says(tmp_path, monkeypatch):
     assert f(result["AUROC"]["pooled"]["mean"]) == readme_facts(_results())["example_auroc"]
 
 
-def test_study_data_is_package_1_1_0():
-    """With REQUIRE_STUDY_DATA=1 the real package must be 1.1.0 (it has task/ and silence/ for Z4 and Z6)."""
+def test_study_data_is_package_1_1_1():
+    """With REQUIRE_STUDY_DATA=1 the real package must be 1.1.1 (task/, silence/ and hvp/ for Z4, Z6 and Z7)."""
     from flyvis_circuit_bench import data
 
     if os.environ.get("REQUIRE_STUDY_DATA") != "1":
         pytest.skip("only checked with REQUIRE_STUDY_DATA=1")
-    assert data.package_version(DATA) == "1.1.0", f"{DATA}: package 1.1.0 required (fcb download)"
+    assert data.package_version(DATA) == "1.1.1", f"{DATA}: package 1.1.1 required (fcb download)"
     assert data.verify(DATA) == []
-    assert all((DATA / rel).is_file() for rel in data.v11_files())
+    assert all((DATA / rel).is_file() for rel in data.v11_files() + data.v111_files())

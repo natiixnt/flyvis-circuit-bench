@@ -125,7 +125,7 @@ każda waga jest stałą funkcją anatomii; trening odsuwa siły od niej.
 ## v1.1: analizy eksploracyjne †
 
 Dodane po badaniu, zdefiniowane w [docs/analysis-plan-v1.1.md](docs/analysis-plan-v1.1.md) przed uruchomieniem,
-oznaczone †; żadna nie zmienia zapisanej decyzji. `fcb reproduce` liczy je od nowa z paczki 1.1.0.
+oznaczone †; żadna nie zmienia zapisanej decyzji. `fcb reproduce` liczy je od nowa z paczki 1.1.1.
 
 - **Próg ([Z1](docs/v1.1/z1.md)).** Przesunięcie progu z górnych 31 na górne 121 klas nie zmienia kolejności żadnej
   pary metod (0 zamian wśród 45 par); liczba synaps zostaje między AUROC 0.745 a 0.763, patching między 0.982 a
@@ -143,6 +143,9 @@ oznaczone †; żadna nie zmienia zapisanej decyzji. `fcb reproduce` liczy je od
 - **Wyciszanie całego typu ([Z6](docs/v1.1/z6.md)).** Wyciszenie naraz wszystkich klas wychodzących z jednego z 63
   typów źródłowych daje efekt o Spearmanie 0.976 z sumą efektów jego klas; 12 typów maskuje, a 7 działa odwrotnie.
   W 12 z 630 par typ x model wyciszenie rozbija dynamikę sieci, więc te wnioski opieramy na rangach.
+- **Poprawka drugiego rzędu ([Z7](docs/v1.1/z7.md)).** Patching z poprawką przez iloczyn Hessianu z wektorem osiąga
+  0.971 osiągalnego sygnału, a patching na tych samych 8 bodźcach 0.969; AUROC zmienia się o +0.0007
+  [-0.0009, +0.0021], więc przedział zawiera zero.
 - **Ablacja do średniej ([wynik repozytorium badawczego](docs/v1.1/mean-ablation.md)).** Zastąpienie prądu klasy
   jego średnią zamiast zerem zachowuje kolejność metod: patching 0.974 (0.987 dla zerowania), liczba synaps 0.777
   (0.763). Tego wyniku `fcb reproduce` nie liczy od nowa, pomiarów nie ma w paczce.
@@ -238,7 +241,7 @@ nie wyznacza dynamiki: [docs/related_work.md](docs/related_work.md).
 - **Odtworzenie bajt w bajt.** `fcb reproduce --check` przelicza `results/results.json` i `docs/results.md` i
   porównuje je bajt w bajt; CI sprawdza tę ścieżkę kodu na danych syntetycznych przy każdym pushu.
 - **Sumy kontrolne.** Asset wydania ma `SHA256SUMS`; `fcb download` sprawdza archiwum i każdy plik w środku
-  (sha256 archiwum 1.1.0 `sha256:f21ee4573834dbfad4517da00da200c590df9f544a0d26df8d26b24f48db2bb3`, archiwum 1.0.0 `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). Pliki pomiarów są
+  (sha256 archiwum 1.1.1 `sha256:ffcac2796b6748dd451bacc9b46515dd1c1b9755428cbf9bec12e6f79b7eb33d`, archiwum 1.1.0 `sha256:f21ee4573834dbfad4517da00da200c590df9f544a0d26df8d26b24f48db2bb3`, archiwum 1.0.0 `sha256:61d15c127b488eb96d0352d60e09f9f55349c91a2dac61dd90cfa236e53c1341`). Pliki pomiarów są
   bajtowo identyczne z tymi, z których policzono tabele badania.
 - **Determinizm.** Stałe ziarna (bootstrap 20261101, losowe kierunki dla każdego bodźca), posortowana kolejność
   modeli, wykresy bez znaczników czasu. Użyliśmy dwóch urządzeń (Apple silicon dla modeli 000-004, CUDA dla

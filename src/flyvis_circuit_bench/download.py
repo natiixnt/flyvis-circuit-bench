@@ -19,9 +19,10 @@ from . import __version__
 from .data import CHECKSUMS, read_checksums, verify
 
 REPO = "flyvis-circuit-bench"
-# Package 1.1.0 = package 1.0.0 byte for byte plus task/ and silence/ (Z4, Z6). Version 1.0.0 stays available.
-DATA_VERSION = "1.1.0"
-VERSIONS = ("1.0.0", "1.1.0")
+# Package 1.1.0 = package 1.0.0 byte for byte plus task/ and silence/ (Z4, Z6); package 1.1.1 = 1.1.0 byte for byte
+# plus hvp/ (Z7). Versions 1.0.0 and 1.1.0 stay available.
+DATA_VERSION = "1.1.1"
+VERSIONS = ("1.0.0", "1.1.0", "1.1.1")
 PACKAGE = f"measurements-v{DATA_VERSION}"
 ASSET = f"{PACKAGE}.tar.gz"
 
@@ -107,7 +108,7 @@ def download(owner: str, dest_parent: Path, repo: str = REPO, tag: str | None = 
              version: str = DATA_VERSION) -> Path:
     """Fetch the release asset and its SHA256SUMS, verify, extract; returns the package directory.
 
-    `version` picks the package (default 1.1.0); `tag` is the release tag, default `v<version>`."""
+    `version` picks the package (default 1.1.1); `tag` is the release tag, default `v<version>`."""
     asset = asset_name(version)
     tag = tag or f"v{version}"
     dest_parent = Path(dest_parent)

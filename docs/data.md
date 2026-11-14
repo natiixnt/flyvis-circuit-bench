@@ -1,10 +1,12 @@
 # Measurement package: data dictionary
 
-`measurements-v1.1.0.tar.gz` (40.3 MB, CC BY 4.0) is published as a GitHub Release asset. `fcb download`
-fetches it, checks the archive against the release `SHA256SUMS`, extracts it to `data/measurements-v1.1.0/`
-and checks every file against the `SHA256SUMS` inside. Package 1.1.0 is package 1.0.0 (38.5 MB, still available
-with `fcb download --version 1.0.0`) byte for byte plus the directories `task/` and `silence/`. With 1.0.0
-`fcb reproduce` computes everything of the study and says that Z4 and Z6 need 1.1.0. Files are byte-identical to the ones the study tables were
+`measurements-v1.1.1.tar.gz` (CC BY 4.0) is published as a GitHub Release asset. `fcb download`
+fetches it, checks the archive against the release `SHA256SUMS`, extracts it to `data/measurements-v1.1.1/`
+and checks every file against the `SHA256SUMS` inside. Package 1.1.1 is package 1.1.0 (40.3 MB, still available
+with `fcb download --version 1.1.0`) byte for byte plus the directory `hvp/`; package 1.1.0 is package 1.0.0
+(38.5 MB, `--version 1.0.0`) byte for byte plus `task/` and `silence/`. With 1.1.0 `fcb reproduce` computes
+everything except Z7 and says that Z7 needs 1.1.1; with 1.0.0 it also leaves out Z4 and Z6 (they need 1.1.0).
+The committed result blocks of the analyses a package cannot recompute are kept and not compared. Files are byte-identical to the ones the study tables were
 computed from; array keys keep the names used during the study, several of them Polish (translated below).
 Short codes of methods and networks in file names and keys are mapped to plain names in the
 [glossary](methodology.md#glossary).
@@ -84,6 +86,21 @@ Trained networks, models 000-009; written by `fcb measure --what silence`.
 | `wzgledne` | 63 x 40 | relative effect per type and stimulus |
 | `tipy`, `n_klas` | 63 | source cell types and the number of their classes |
 | `bodzce` | 40 | stimulus identifiers |
+
+## hvp/C1_<model>.npz (package 1.1.1, Z7)
+
+Trained networks, models 000-009; written by `fcb measure --what hvp` (NVIDIA GPU). Patching with a second-order
+(Hessian-vector product) correction on 8 of the 40 stimuli of B, indices fixed by the plan.
+
+| key | shape | meaning |
+|---|---|---|
+| `PH` | 604 | score of patching with the correction, mean over the 8 stimuli |
+| `PH_B1`, `PH_B2` | 604 | the same on the two halves of B (those of the 8 stimuli that belong to each half) |
+| `P_chk` | 604 | patching (first-order term) of the same run, the fair comparison with `PH` |
+| `cross`, `Q` | 604 | the two parts of `PH` that contain the second-order term: the cross term of the square and the square of the second-order term, as in `P_chk` |
+| `PH_b` | 8 x 604 | `PH` per stimulus |
+| `bodzce` | 8 | stimulus identifiers |
+| `meta` | | JSON: backend, K, number and indices of the stimuli, seconds, peak GPU memory |
 
 ## Other files
 

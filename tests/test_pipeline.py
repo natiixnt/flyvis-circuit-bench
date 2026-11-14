@@ -109,7 +109,7 @@ def test_reproduce_on_package_without_task_and_silence_keeps_their_results(packa
     capsys.readouterr()
     assert main(["reproduce", "--data", str(package), "--json", str(j), "--markdown", str(md), "--check"]) == 0
     err = capsys.readouterr().err
-    assert "not computed: Z4, Z6" in err and "package 1.1.0" in err
+    assert "not computed: Z4, Z6, Z7" in err and "Z7 needs package 1.1.1" in err and "Z4 needs package 1.1.0" in err
     committed["headline"]["D_C1_N5"]["mean"] += 0.5  # a changed v1.0 key is still red
     j.write_text(json.dumps(committed), encoding="utf-8")
     assert main(["reproduce", "--data", str(package), "--json", str(j), "--markdown", str(md), "--check"]) == 1
