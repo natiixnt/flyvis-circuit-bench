@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] - 2026-11-15
+
+### Changed
+
+- Preprint corrections. Only the version number and the paper text change; the measurement package stays 1.1.1 and
+  `fcb download` is unchanged, so `fcb reproduce --check` gives the same file as in 1.1.1.
+  The paper now states how models 000-009 were selected (the ten best of 50 by task error, as described by FlyHack),
+  reports the recording analysis as a share of the gain over synapse count, and describes the measurement code
+  and the version of each result accurately.
+
 ## [1.1.1] - 2026-11-14
 
 ### Added

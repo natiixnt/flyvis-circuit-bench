@@ -135,8 +135,9 @@ def per_model(results: dict, plt, theme: dict):
     ax.tick_params(axis="x", length=0, pad=8)
     keys = [plt.Line2D([], [], ls="none", marker="o", ms=8, color=theme[k], label=name)
             for k, name in (("S", "synapse count"), ("P", "attribution patching"))]
-    ax.legend(handles=keys, loc="lower left", bbox_to_anchor=(-0.02, 1.0), ncol=1, handletextpad=0.1,
-              columnspacing=1.0, borderaxespad=0.2)
+    # one row, and the title is lifted above it, so the legend never runs into the two-line title
+    ax.legend(handles=keys, loc="lower left", bbox_to_anchor=(-0.02, 1.0), ncol=2, handletextpad=0.1,
+              columnspacing=1.4, borderaxespad=0.2)
     # below every point of the untrained group (its lowest AUROC is far above 0.75), so it never covers data
     ax.text(3.625, 0.70, "patching at\nthe ceiling", ha="center", va="center", color=theme["muted"],
             fontsize=MIN_FONT_PT)
@@ -145,7 +146,7 @@ def per_model(results: dict, plt, theme: dict):
     ax.set_ylabel("AUROC vs ablation truth")
     ax.grid(axis="x", visible=False)
     n = len([m for m in per if "C1" in per[m]])
-    ax.set_title(f"Synapse count vs attribution\npatching, {n} models", pad=34, loc="left", fontweight="bold")
+    ax.set_title(f"Synapse count vs attribution\npatching, {n} models", pad=40, loc="left", fontweight="bold")
     return fig
 
 

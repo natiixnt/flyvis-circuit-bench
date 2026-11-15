@@ -12,12 +12,12 @@ abstract: >-
 authors:
   - family-names: Szczepanik
     given-names: Natalia
-version: 1.1.1
-date-released: 2026-11-14
+version: 1.1.2
+date-released: 2026-11-15
 license: MIT
 repository-code: "https://github.com/natiixnt/flyvis-circuit-bench"
 url: "https://github.com/natiixnt/flyvis-circuit-bench"
-# doi: a Zenodo DOI will be added here with the next release
+# doi: TODO (the Zenodo DOI of release 1.1.2; set together with zenodoDOI in wydanie/paper/gen_numbers.py)
 keywords:
   - connectome
   - interpretability
